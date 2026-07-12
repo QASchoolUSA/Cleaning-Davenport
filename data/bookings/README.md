@@ -1,13 +1,24 @@
 # Booking Broom Integration
 
-Bookings from the website calculator currently POST to `/api/bookings` and are
-stored as JSON files under `data/bookings/`.
+Bookings from the website calculator POST to `/api/bookings`, are stored as
+JSON under `data/bookings/`, and are forwarded to Booking Broom when credentials
+are set.
 
-When Booking Broom credentials are available:
+## Env vars
 
-1. Add env vars (example): `BOOKING_BROOM_API_KEY`, `BOOKING_BROOM_ENDPOINT`
-2. Update `app/api/bookings/route.ts` to forward the validated payload
-3. Keep the calculator request body shape stable so the UI does not need changes
+| Variable | Required | Example |
+|----------|----------|---------|
+| `BOOKING_BROOM_URL` | for forward | `https://bookings.kedrik.com` or `http://localhost:3000` |
+| `BOOKING_BROOM_API_KEY` | for forward | `bb_davenport_dev_key` (local) |
+| `BOOKING_BROOM_SITE_SLUG` | optional | `davenport` (default) |
 
-Payload includes: serviceType, sqft, bedrooms, bathrooms, frequency, addons,
-intent (`quote` | `book`), schedule fields, contact fields, and `estimate`.
+See `.env.example`. Without `BOOKING_BROOM_URL` / `BOOKING_BROOM_API_KEY`, the
+route still accepts bookings and saves them locally (`bookingBroomStatus:
+"pending_integration"`). When credentials are set and forward fails, the API
+returns **502**.
+
+## Payload
+
+Calculator body stays camelCase. Server maps to Booking Broom snake_case
+(`customer_name`, `service_type`, etc.) and packs estimate / home details into
+`notes`. See `lib/booking-broom.ts`.

@@ -6,6 +6,8 @@ export const siteConfig = {
     "Professional house, apartment, Airbnb, move-in/out, deep, and post-construction cleaning in Davenport, FL. Easy online quotes. No upfront payment.",
   url: "https://cleaningdavenport.com",
   email: "info@cleaningdavenport.com",
+  /** Booking Broom site_slug */
+  bookingSlug: "davenport",
   phone: null as string | null, // Add when provided
   address: {
     city: "Davenport",
