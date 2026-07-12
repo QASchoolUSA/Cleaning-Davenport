@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import { Breadcrumbs, CtaBand, FaqList, SectionHeading } from "@/components/ui";
 import type { FrequencyPage } from "@/lib/frequencies";
 import { JsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
@@ -82,7 +83,12 @@ export function FrequencyPageView({ page }: { page: FrequencyPage }) {
             title="Build your estimate"
             description={`${page.name} is ready to select in the calculator.`}
           />
-          <BookingCalculator defaultFrequency={page.frequencyId} />
+          <div className="md:hidden">
+            <QuoteLaunchCard />
+          </div>
+          <div className="hidden md:block">
+            <BookingCalculator defaultFrequency={page.frequencyId} />
+          </div>
         </section>
       </div>
       <CtaBand />

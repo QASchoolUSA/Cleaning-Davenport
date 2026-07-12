@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import { CtaBand, FaqList, ReviewCard, SectionHeading } from "@/components/ui";
 import { areas } from "@/lib/areas";
 import { reviews, siteFaqs } from "@/lib/content";
@@ -133,7 +134,10 @@ export default function HomePage() {
           title="See your price before you commit"
           description="Live pricing from square footage, rooms, schedule, and extras. Designed for thumbs and desktops alike."
         />
-        <BookingCalculator />
+        <QuoteLaunchCard />
+        <div className="hidden md:block">
+          <BookingCalculator />
+        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">

@@ -13,6 +13,7 @@ import {
   type ServiceTypeId,
 } from "@/lib/pricing";
 import { services } from "@/lib/services";
+import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 
 const TIME_WINDOWS = [
@@ -20,6 +21,15 @@ const TIME_WINDOWS = [
   "Afternoon (12pm–4pm)",
   "Evening (4pm–7pm)",
   "Flexible / any time",
+] as const;
+
+/** Mobile app flow — one short screen per step, no nested scroll */
+const APP_STEPS = [
+  "Service",
+  "Home",
+  "Schedule",
+  "Add-ons",
+  "Contact",
 ] as const;
 
 type Intent = "quote" | "book";
@@ -61,10 +71,10 @@ const initial: FormState = {
 };
 
 const selectClass =
-  "w-full appearance-none rounded-xl border border-line bg-white px-3 py-2.5 text-sm text-charcoal outline-none focus:border-teal";
+  "w-full appearance-none rounded-xl border border-line bg-white px-3 py-3 text-base text-charcoal outline-none focus:border-teal";
 
 const inputClass =
-  "w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-teal";
+  "w-full rounded-xl border border-line bg-white px-3 py-3 text-base outline-none focus:border-teal";
 
 const ADDON_ICONS: Record<AddonId, { short: string; icon: ReactNode }> = {
   "kitchen-deep": {
@@ -95,7 +105,7 @@ const ADDON_ICONS: Record<AddonId, { short: string; icon: ReactNode }> = {
     ),
   },
   "windows-interior": {
-    short: "Windows in",
+    short: "Win in",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="3" y="4" width="18" height="16" rx="1" />
@@ -104,11 +114,11 @@ const ADDON_ICONS: Record<AddonId, { short: string; icon: ReactNode }> = {
     ),
   },
   "windows-exterior": {
-    short: "Windows out",
+    short: "Win out",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="3" y="4" width="18" height="16" rx="1" />
-        <path d="M12 4v16M3 12h18M17 2l2 2-2 2" />
+        <path d="M12 4v16M3 12h18" />
       </svg>
     ),
   },
@@ -118,7 +128,6 @@ const ADDON_ICONS: Record<AddonId, { short: string; icon: ReactNode }> = {
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="4" y="3" width="16" height="18" rx="2" />
         <circle cx="12" cy="13" r="4" />
-        <path d="M8 6h.01M11 6h2" />
       </svg>
     ),
   },
@@ -150,7 +159,7 @@ const ADDON_ICONS: Record<AddonId, { short: string; icon: ReactNode }> = {
     ),
   },
   pets: {
-    short: "Pet hair",
+    short: "Pets",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
         <ellipse cx="12" cy="14" rx="5" ry="4" />
@@ -166,12 +175,16 @@ const ADDON_ICONS: Record<AddonId, { short: string; icon: ReactNode }> = {
 export function BookingCalculator({
   defaultService,
   defaultFrequency,
+  variant = "embedded",
 }: {
   compact?: boolean;
   defaultService?: ServiceTypeId;
   defaultFrequency?: FrequencyId;
+  /** `app` = full-screen mobile quote flow with short steps, no nested scroll */
+  variant?: "embedded" | "app";
 }) {
-  const [step, setStep] = useState<0 | 1>(0);
+  const isApp = variant === "app";
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>({
     ...initial,
     serviceType: defaultService ?? initial.serviceType,
@@ -183,6 +196,9 @@ export function BookingCalculator({
     total: number;
     intent: Intent;
   } | null>(null);
+
+  const totalSteps = isApp ? APP_STEPS.length : 2;
+  const lastStep = totalSteps - 1;
 
   const breakdown = useMemo(
     () =>
@@ -208,6 +224,21 @@ export function BookingCalculator({
         ? prev.addons.filter((a) => a !== id)
         : [...prev.addons, id],
     }));
+  }
+
+  function canContinue() {
+    if (!isApp) return true;
+    if (step === 2 && form.intent === "book" && !form.preferredDate) return false;
+    if (step === lastStep) {
+      return (
+        form.name.trim().length > 1 &&
+        form.email.includes("@") &&
+        form.phone.trim().length >= 7 &&
+        form.zip.trim().length >= 5 &&
+        (form.intent === "quote" || !!form.preferredDate)
+      );
+    }
+    return true;
   }
 
   function canSubmit() {
@@ -246,405 +277,198 @@ export function BookingCalculator({
     }
   }
 
+  function reset() {
+    setSuccess(null);
+    setStep(0);
+    setForm({
+      ...initial,
+      serviceType: defaultService ?? initial.serviceType,
+      frequency: defaultFrequency ?? initial.frequency,
+    });
+  }
+
   if (success) {
     return (
-      <div className="rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">
-          Request received
-        </p>
-        <h3 className="mt-2 font-display text-2xl text-charcoal sm:text-3xl">
-          {success.intent === "book"
-            ? "Your booking request is in"
-            : "Your quote request is in"}
-        </h3>
-        <p className="mt-3 text-sm text-muted sm:text-base">
-          Estimated total:{" "}
-          <strong className="text-charcoal">{formatUSD(success.total)}</strong>
-          . No payment due now — you pay after cleaning.
-        </p>
-        <button
-          type="button"
-          className="mt-5 rounded-full bg-teal px-5 py-3 text-sm font-semibold text-white hover:bg-teal-dark"
-          onClick={() => {
-            setSuccess(null);
-            setStep(0);
-            setForm({
-              ...initial,
-              serviceType: defaultService ?? initial.serviceType,
-              frequency: defaultFrequency ?? initial.frequency,
-            });
-          }}
-        >
-          Start another quote
-        </button>
+      <div
+        className={
+          isApp
+            ? "flex h-dvh flex-col bg-cream px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]"
+            : "rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-8"
+        }
+      >
+        <div className="my-auto">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">
+            Request received
+          </p>
+          <h3 className="mt-2 font-display text-3xl text-charcoal">
+            {success.intent === "book"
+              ? "Booking request sent"
+              : "Quote request sent"}
+          </h3>
+          <p className="mt-3 text-muted">
+            Estimated total:{" "}
+            <strong className="text-charcoal">{formatUSD(success.total)}</strong>
+            . Pay after cleaning — nothing due now.
+          </p>
+          <div className="mt-8 flex flex-col gap-3">
+            <button
+              type="button"
+              className="rounded-full bg-teal px-5 py-3.5 text-sm font-semibold text-white"
+              onClick={reset}
+            >
+              Start another quote
+            </button>
+            {isApp ? (
+              <Link
+                href="/"
+                className="rounded-full border border-line bg-white px-5 py-3.5 text-center text-sm font-semibold text-charcoal"
+              >
+                Back to home
+              </Link>
+            ) : null}
+          </div>
+        </div>
       </div>
     );
   }
 
+  const progress = ((step + 1) / totalSteps) * 100;
+
+  const shellClass = isApp
+    ? "flex h-dvh flex-col overflow-hidden bg-cream"
+    : "overflow-hidden rounded-2xl border border-line bg-white shadow-sm lg:grid lg:grid-cols-[1.35fr_0.85fr]";
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm lg:grid lg:grid-cols-[1.35fr_0.85fr]">
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line bg-gradient-to-r from-teal-light to-sky/70 px-4 py-3 lg:hidden">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-teal">
-            Estimate · pay after
-          </p>
-          <p className="font-display text-2xl leading-none text-charcoal">
-            {formatUSD(breakdown.total)}
-          </p>
-        </div>
-        <p className="max-w-[45%] text-right text-xs text-muted">
-          {FREQUENCY_LABELS[form.frequency]}
-          {breakdown.frequencyDiscount > 0
-            ? ` · save ${formatUSD(breakdown.frequencyDiscount)}`
-            : ""}
-        </p>
+    <div className={shellClass}>
+      {/* Top bar */}
+      <div
+        className={
+          isApp
+            ? "shrink-0 border-b border-line bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+            : "sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line bg-gradient-to-r from-teal-light to-sky/70 px-4 py-3 lg:hidden"
+        }
+      >
+        {isApp ? (
+          <>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <Link
+                href="/"
+                className="text-sm font-semibold text-muted"
+                aria-label="Close quote"
+              >
+                ← Close
+              </Link>
+              <p className="font-display text-lg text-teal">Quote</p>
+              <p className="min-w-[4.5rem] text-right font-display text-xl text-charcoal">
+                {formatUSD(breakdown.total)}
+              </p>
+            </div>
+            <div className="mb-1 flex items-center justify-between text-[11px] font-semibold text-muted">
+              <span>
+                {step + 1}/{totalSteps} · {APP_STEPS[step]}
+              </span>
+              <span>
+                {FREQUENCY_LABELS[form.frequency]}
+                {form.addons.length > 0 ? ` · ${form.addons.length} add-on` : ""}
+              </span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-teal-light">
+              <div
+                className="h-full rounded-full bg-teal transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-teal">
+                Estimate · pay after
+              </p>
+              <p className="font-display text-2xl leading-none text-charcoal">
+                {formatUSD(breakdown.total)}
+              </p>
+            </div>
+            <p className="max-w-[45%] text-right text-xs text-muted">
+              {FREQUENCY_LABELS[form.frequency]}
+            </p>
+          </>
+        )}
       </div>
 
-      <div className="flex max-h-[calc(100dvh-11rem)] flex-col md:max-h-none">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6 sm:py-6 lg:overflow-visible">
-          {step === 0 ? (
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal">
-                Step 1 of 2 · Build quote
-              </p>
-
-              <SelectField label="Service type">
-                <select
-                  className={selectClass}
-                  value={form.serviceType}
-                  onChange={(e) =>
-                    update("serviceType", e.target.value as ServiceTypeId)
-                  }
-                >
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.shortName}
-                    </option>
-                  ))}
-                </select>
-              </SelectField>
-
-              <SelectField label="Home size">
-                <select
-                  className={selectClass}
-                  value={
-                    SQFT_PRESETS.some((p) => p.value === form.sqft)
-                      ? form.sqft
-                      : "custom"
-                  }
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v === "custom") return;
-                    update("sqft", Number(v));
-                  }}
-                >
-                  {SQFT_PRESETS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label} (~{p.value.toLocaleString()} sq ft)
-                    </option>
-                  ))}
-                  {!SQFT_PRESETS.some((p) => p.value === form.sqft) ? (
-                    <option value="custom">
-                      Custom ({form.sqft.toLocaleString()} sq ft)
-                    </option>
-                  ) : null}
-                </select>
-              </SelectField>
-
-              <div className="grid grid-cols-2 gap-3">
-                <SelectField label="Bedrooms">
-                  <select
-                    className={selectClass}
-                    value={form.bedrooms}
-                    onChange={(e) => update("bedrooms", Number(e.target.value))}
-                  >
-                    {Array.from({ length: 9 }, (_, i) => (
-                      <option key={i} value={i}>
-                        {i === 0 ? "Studio / 0" : i}
-                      </option>
-                    ))}
-                  </select>
-                </SelectField>
-                <SelectField label="Bathrooms">
-                  <select
-                    className={selectClass}
-                    value={form.bathrooms}
-                    onChange={(e) =>
-                      update("bathrooms", Number(e.target.value))
-                    }
-                  >
-                    {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </SelectField>
-              </div>
-
-              <SelectField label="How often">
-                <select
-                  className={selectClass}
-                  value={form.frequency}
-                  onChange={(e) =>
-                    update("frequency", e.target.value as FrequencyId)
-                  }
-                >
-                  {(Object.keys(FREQUENCY_LABELS) as FrequencyId[]).map(
-                    (id) => (
-                      <option key={id} value={id}>
-                        {FREQUENCY_LABELS[id]}
-                        {FREQUENCY_DISCOUNT_LABELS[id]
-                          ? ` (${FREQUENCY_DISCOUNT_LABELS[id]})`
-                          : ""}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </SelectField>
-
-              <div>
-                <div className="mb-1.5 flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-charcoal">Add-ons</p>
-                  <p className="text-[11px] text-muted">
-                    {form.addons.length === 0
-                      ? "Tap to add"
-                      : `+${formatUSD(breakdown.addons)}`}
-                  </p>
-                </div>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {(Object.keys(ADDON_ICONS) as AddonId[]).map((id) => {
-                    const selected = form.addons.includes(id);
-                    const meta = ADDON_ICONS[id];
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => toggleAddon(id)}
-                        aria-pressed={selected}
-                        title={`${ADDON_META[id].label} (+${formatUSD(ADDON_PRICES[id])})`}
-                        className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2 transition ${
-                          selected
-                            ? "border-teal bg-teal text-white shadow-sm"
-                            : "border-line bg-cream/80 text-charcoal hover:border-teal/50"
-                        }`}
-                      >
-                        <span className={selected ? "text-white" : "text-teal"}>
-                          {meta.icon}
-                        </span>
-                        <span className="text-center text-[9px] font-semibold leading-tight sm:text-[10px]">
-                          {meta.short}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {form.addons.length > 0 ? (
-                  <ul className="mt-2 flex flex-wrap gap-1.5">
-                    {form.addons.map((id) => (
-                      <li
-                        key={id}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-teal-light px-2.5 py-1 text-[11px] font-medium text-teal-dark"
-                      >
-                        <span className="inline-flex scale-75 text-teal">
-                          {ADDON_ICONS[id].icon}
-                        </span>
-                        {ADDON_META[id].label}
-                        <span className="text-teal">
-                          +{formatUSD(ADDON_PRICES[id])}
-                        </span>
-                        <button
-                          type="button"
-                          aria-label={`Remove ${ADDON_META[id].label}`}
-                          onClick={() => toggleAddon(id)}
-                          className="ml-0.5 text-teal-dark/70 hover:text-teal-dark"
-                        >
-                          ×
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-
-              <div className="hidden sm:block">
-                <label className="mb-1.5 block text-xs font-semibold text-charcoal">
-                  Fine-tune sq ft: {form.sqft.toLocaleString()}
-                </label>
-                <input
-                  type="range"
-                  min={400}
-                  max={5000}
-                  step={50}
-                  value={form.sqft}
-                  onChange={(e) => update("sqft", Number(e.target.value))}
-                  className="w-full accent-teal"
-                />
-              </div>
-            </div>
+      <div
+        className={
+          isApp
+            ? "flex min-h-0 flex-1 flex-col"
+            : "flex max-h-[calc(100dvh-11rem)] flex-col md:max-h-none"
+        }
+      >
+        {/* Content — app mode: no scroll, one screen */}
+        <div
+          className={
+            isApp
+              ? "flex min-h-0 flex-1 flex-col justify-center overflow-hidden px-4 py-4"
+              : "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6 sm:py-6 lg:overflow-visible"
+          }
+        >
+          {isApp ? (
+            <AppStep
+              step={step}
+              form={form}
+              update={update}
+              toggleAddon={toggleAddon}
+              breakdownAddons={breakdown.addons}
+            />
           ) : (
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal">
-                Step 2 of 2 · Contact & schedule
-              </p>
-
-              <SelectField label="What do you need?">
-                <select
-                  className={selectClass}
-                  value={form.intent}
-                  onChange={(e) => update("intent", e.target.value as Intent)}
-                >
-                  <option value="book">Request a booking date</option>
-                  <option value="quote">Quote only — schedule later</option>
-                </select>
-              </SelectField>
-
-              {form.intent === "book" ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="block">
-                    <span className="mb-1.5 block text-xs font-semibold">
-                      Preferred date
-                    </span>
-                    <input
-                      type="date"
-                      value={form.preferredDate}
-                      onChange={(e) => update("preferredDate", e.target.value)}
-                      className={inputClass}
-                    />
-                  </label>
-                  <SelectField label="Time window">
-                    <select
-                      className={selectClass}
-                      value={form.timeWindow}
-                      onChange={(e) => update("timeWindow", e.target.value)}
-                    >
-                      {TIME_WINDOWS.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                  </SelectField>
-                </div>
-              ) : (
-                <p className="rounded-xl bg-sky/50 px-3 py-2 text-xs text-muted">
-                  We will email your estimate. Schedule anytime — still no
-                  upfront payment.
-                </p>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-semibold">Name</span>
-                  <input
-                    className={inputClass}
-                    value={form.name}
-                    onChange={(e) => update("name", e.target.value)}
-                    autoComplete="name"
-                    required
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-semibold">ZIP</span>
-                  <input
-                    className={inputClass}
-                    value={form.zip}
-                    onChange={(e) => update("zip", e.target.value)}
-                    autoComplete="postal-code"
-                    required
-                  />
-                </label>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-semibold">
-                    Email
-                  </span>
-                  <input
-                    type="email"
-                    className={inputClass}
-                    value={form.email}
-                    onChange={(e) => update("email", e.target.value)}
-                    autoComplete="email"
-                    required
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-semibold">
-                    Phone
-                  </span>
-                  <input
-                    type="tel"
-                    className={inputClass}
-                    value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
-                    autoComplete="tel"
-                    required
-                  />
-                </label>
-              </div>
-              <label className="block">
-                <span className="mb-1.5 block text-xs font-semibold">
-                  Address{" "}
-                  <span className="font-normal text-muted">(optional)</span>
-                </span>
-                <input
-                  className={inputClass}
-                  value={form.address}
-                  onChange={(e) => update("address", e.target.value)}
-                  autoComplete="street-address"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1.5 block text-xs font-semibold">
-                  Notes{" "}
-                  <span className="font-normal text-muted">
-                    (pets, gate code)
-                  </span>
-                </span>
-                <input
-                  className={inputClass}
-                  value={form.notes}
-                  onChange={(e) => update("notes", e.target.value)}
-                  placeholder="Optional"
-                />
-              </label>
-            </div>
+            <EmbeddedSteps
+              step={step}
+              form={form}
+              update={update}
+              toggleAddon={toggleAddon}
+              breakdownAddons={breakdown.addons}
+            />
           )}
 
           {error ? (
-            <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">
+            <p className="mt-3 shrink-0 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">
               {error}
             </p>
           ) : null}
         </div>
 
-        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-line bg-white px-4 py-3 sm:px-6">
-          {step === 1 ? (
+        <div
+          className={
+            isApp
+              ? "flex shrink-0 items-center justify-between gap-3 border-t border-line bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+              : "flex shrink-0 items-center justify-between gap-3 border-t border-line bg-white px-4 py-3 sm:px-6"
+          }
+        >
+          {step > 0 ? (
             <button
               type="button"
-              onClick={() => setStep(0)}
-              className="rounded-full px-3 py-2.5 text-sm font-semibold text-muted"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              className="rounded-full px-4 py-3 text-sm font-semibold text-muted"
             >
               Back
             </button>
           ) : (
-            <span className="text-xs text-muted">No payment upfront</span>
+            <span className="text-xs text-muted">Pay after cleaning</span>
           )}
-          {step === 0 ? (
+          {step < lastStep ? (
             <button
               type="button"
-              onClick={() => setStep(1)}
-              className="rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-dark"
+              disabled={!canContinue()}
+              onClick={() => setStep((s) => s + 1)}
+              className="min-w-[8rem] rounded-full bg-teal px-6 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
-              Continue
+              Next
             </button>
           ) : (
             <button
               type="button"
               disabled={!canSubmit() || submitting}
               onClick={submit}
-              className="rounded-full bg-coral px-5 py-2.5 text-sm font-semibold text-white hover:bg-coral-dark disabled:opacity-40"
+              className="min-w-[8rem] rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
               {submitting
                 ? "Sending…"
@@ -656,42 +480,565 @@ export function BookingCalculator({
         </div>
       </div>
 
-      <aside className="hidden border-l border-line bg-gradient-to-b from-teal-light/80 to-sky/50 p-6 lg:block">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">
-          Live estimate
+      {!isApp ? (
+        <aside className="hidden border-l border-line bg-gradient-to-b from-teal-light/80 to-sky/50 p-6 lg:block">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">
+            Live estimate
+          </p>
+          <p className="mt-2 font-display text-5xl text-charcoal">
+            {formatUSD(breakdown.total)}
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            {FREQUENCY_LABELS[form.frequency]}
+            {breakdown.frequencyDiscount > 0
+              ? ` · saves ${formatUSD(breakdown.frequencyDiscount)}`
+              : ""}
+          </p>
+          <ul className="mt-5 space-y-2 text-sm text-muted">
+            <li className="flex justify-between gap-3">
+              <span>Base (size + service)</span>
+              <span>{formatUSD(breakdown.base)}</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Bedrooms</span>
+              <span>{formatUSD(breakdown.bedrooms)}</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Bathrooms</span>
+              <span>{formatUSD(breakdown.bathrooms)}</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Add-ons</span>
+              <span>{formatUSD(breakdown.addons)}</span>
+            </li>
+          </ul>
+          <p className="mt-5 rounded-xl bg-white/70 px-3 py-3 text-xs leading-relaxed text-muted">
+            Estimate only. <strong>Pay after cleaning</strong>, never upfront.
+          </p>
+        </aside>
+      ) : null}
+    </div>
+  );
+}
+
+function AppStep({
+  step,
+  form,
+  update,
+  toggleAddon,
+  breakdownAddons,
+}: {
+  step: number;
+  form: FormState;
+  update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+  toggleAddon: (id: AddonId) => void;
+  breakdownAddons: number;
+}) {
+  if (step === 0) {
+    return (
+      <div className="space-y-3">
+        <h2 className="font-display text-2xl text-charcoal">What do you need?</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {services.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => update("serviceType", s.id)}
+              className={`rounded-2xl border px-3 py-3.5 text-left text-sm font-semibold ${
+                form.serviceType === s.id
+                  ? "border-teal bg-teal text-white"
+                  : "border-line bg-white text-charcoal"
+              }`}
+            >
+              {s.shortName}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 1) {
+    return (
+      <div className="space-y-4">
+        <h2 className="font-display text-2xl text-charcoal">About your home</h2>
+        <SelectField label="Size">
+          <select
+            className={selectClass}
+            value={
+              SQFT_PRESETS.some((p) => p.value === form.sqft)
+                ? form.sqft
+                : SQFT_PRESETS[2].value
+            }
+            onChange={(e) => update("sqft", Number(e.target.value))}
+          >
+            {SQFT_PRESETS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label} (~{p.value.toLocaleString()} sq ft)
+              </option>
+            ))}
+          </select>
+        </SelectField>
+        <div className="grid grid-cols-2 gap-3">
+          <SelectField label="Bedrooms">
+            <select
+              className={selectClass}
+              value={form.bedrooms}
+              onChange={(e) => update("bedrooms", Number(e.target.value))}
+            >
+              {Array.from({ length: 9 }, (_, i) => (
+                <option key={i} value={i}>
+                  {i === 0 ? "Studio" : i}
+                </option>
+              ))}
+            </select>
+          </SelectField>
+          <SelectField label="Bathrooms">
+            <select
+              className={selectClass}
+              value={form.bathrooms}
+              onChange={(e) => update("bathrooms", Number(e.target.value))}
+            >
+              {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </SelectField>
+        </div>
+        <SelectField label="How often">
+          <select
+            className={selectClass}
+            value={form.frequency}
+            onChange={(e) => update("frequency", e.target.value as FrequencyId)}
+          >
+            {(Object.keys(FREQUENCY_LABELS) as FrequencyId[]).map((id) => (
+              <option key={id} value={id}>
+                {FREQUENCY_LABELS[id]}
+                {FREQUENCY_DISCOUNT_LABELS[id]
+                  ? ` · ${FREQUENCY_DISCOUNT_LABELS[id]}`
+                  : ""}
+              </option>
+            ))}
+          </select>
+        </SelectField>
+      </div>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <div className="space-y-4">
+        <h2 className="font-display text-2xl text-charcoal">Booking or quote?</h2>
+        <div className="grid gap-2">
+          {(
+            [
+              ["book", "Request a booking", "Pick a preferred date"],
+              ["quote", "Quote only", "Schedule later"],
+            ] as const
+          ).map(([id, title, sub]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => update("intent", id)}
+              className={`rounded-2xl border px-4 py-4 text-left ${
+                form.intent === id
+                  ? "border-teal bg-teal-light"
+                  : "border-line bg-white"
+              }`}
+            >
+              <p className="font-semibold text-charcoal">{title}</p>
+              <p className="mt-0.5 text-sm text-muted">{sub}</p>
+            </button>
+          ))}
+        </div>
+        {form.intent === "book" ? (
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-semibold">Date</span>
+              <input
+                type="date"
+                value={form.preferredDate}
+                onChange={(e) => update("preferredDate", e.target.value)}
+                className={inputClass}
+              />
+            </label>
+            <SelectField label="Time">
+              <select
+                className={selectClass}
+                value={form.timeWindow}
+                onChange={(e) => update("timeWindow", e.target.value)}
+              >
+                {TIME_WINDOWS.map((t) => (
+                  <option key={t} value={t}>
+                    {t.split(" (")[0]}
+                  </option>
+                ))}
+              </select>
+            </SelectField>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-end justify-between gap-2">
+          <h2 className="font-display text-2xl text-charcoal">Add-ons</h2>
+          <p className="text-sm text-muted">
+            {form.addons.length === 0
+              ? "Optional"
+              : `+${formatUSD(breakdownAddons)}`}
+          </p>
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          {(Object.keys(ADDON_ICONS) as AddonId[]).map((id) => {
+            const selected = form.addons.includes(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => toggleAddon(id)}
+                aria-pressed={selected}
+                className={`flex flex-col items-center gap-1 rounded-2xl border px-1 py-3 ${
+                  selected
+                    ? "border-teal bg-teal text-white"
+                    : "border-line bg-white text-charcoal"
+                }`}
+              >
+                <span className={selected ? "text-white" : "text-teal"}>
+                  {ADDON_ICONS[id].icon}
+                </span>
+                <span className="text-center text-[9px] font-semibold leading-tight">
+                  {ADDON_ICONS[id].short}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {form.addons.length > 0 ? (
+          <p className="text-center text-xs text-muted">
+            {form.addons.map((id) => ADDON_META[id].label).join(" · ")}
+          </p>
+        ) : (
+          <p className="text-center text-xs text-muted">
+            Tap icons to add — or skip
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <h2 className="font-display text-2xl text-charcoal">Your details</h2>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1 block text-xs font-semibold">Name</span>
+          <input
+            className={inputClass}
+            value={form.name}
+            onChange={(e) => update("name", e.target.value)}
+            autoComplete="name"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-xs font-semibold">ZIP</span>
+          <input
+            className={inputClass}
+            value={form.zip}
+            onChange={(e) => update("zip", e.target.value)}
+            autoComplete="postal-code"
+            inputMode="numeric"
+          />
+        </label>
+      </div>
+      <label className="block">
+        <span className="mb-1 block text-xs font-semibold">Email</span>
+        <input
+          type="email"
+          className={inputClass}
+          value={form.email}
+          onChange={(e) => update("email", e.target.value)}
+          autoComplete="email"
+        />
+      </label>
+      <label className="block">
+        <span className="mb-1 block text-xs font-semibold">Phone</span>
+        <input
+          type="tel"
+          className={inputClass}
+          value={form.phone}
+          onChange={(e) => update("phone", e.target.value)}
+          autoComplete="tel"
+        />
+      </label>
+      <label className="block">
+        <span className="mb-1 block text-xs font-semibold">
+          Notes <span className="font-normal text-muted">(optional)</span>
+        </span>
+        <input
+          className={inputClass}
+          value={form.notes}
+          onChange={(e) => update("notes", e.target.value)}
+          placeholder="Pets, gate code…"
+        />
+      </label>
+    </div>
+  );
+}
+
+function EmbeddedSteps({
+  step,
+  form,
+  update,
+  toggleAddon,
+  breakdownAddons,
+}: {
+  step: number;
+  form: FormState;
+  update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+  toggleAddon: (id: AddonId) => void;
+  breakdownAddons: number;
+}) {
+  if (step === 0) {
+    return (
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal">
+          Step 1 of 2 · Build quote
         </p>
-        <p className="mt-2 font-display text-5xl text-charcoal">
-          {formatUSD(breakdown.total)}
+        <SelectField label="Service type">
+          <select
+            className={selectClass}
+            value={form.serviceType}
+            onChange={(e) =>
+              update("serviceType", e.target.value as ServiceTypeId)
+            }
+          >
+            {services.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.shortName}
+              </option>
+            ))}
+          </select>
+        </SelectField>
+        <SelectField label="Home size">
+          <select
+            className={selectClass}
+            value={
+              SQFT_PRESETS.some((p) => p.value === form.sqft)
+                ? form.sqft
+                : "custom"
+            }
+            onChange={(e) => {
+              if (e.target.value === "custom") return;
+              update("sqft", Number(e.target.value));
+            }}
+          >
+            {SQFT_PRESETS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label} (~{p.value.toLocaleString()} sq ft)
+              </option>
+            ))}
+          </select>
+        </SelectField>
+        <div className="grid grid-cols-2 gap-3">
+          <SelectField label="Bedrooms">
+            <select
+              className={selectClass}
+              value={form.bedrooms}
+              onChange={(e) => update("bedrooms", Number(e.target.value))}
+            >
+              {Array.from({ length: 9 }, (_, i) => (
+                <option key={i} value={i}>
+                  {i === 0 ? "Studio / 0" : i}
+                </option>
+              ))}
+            </select>
+          </SelectField>
+          <SelectField label="Bathrooms">
+            <select
+              className={selectClass}
+              value={form.bathrooms}
+              onChange={(e) => update("bathrooms", Number(e.target.value))}
+            >
+              {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </SelectField>
+        </div>
+        <SelectField label="How often">
+          <select
+            className={selectClass}
+            value={form.frequency}
+            onChange={(e) =>
+              update("frequency", e.target.value as FrequencyId)
+            }
+          >
+            {(Object.keys(FREQUENCY_LABELS) as FrequencyId[]).map((id) => (
+              <option key={id} value={id}>
+                {FREQUENCY_LABELS[id]}
+                {FREQUENCY_DISCOUNT_LABELS[id]
+                  ? ` (${FREQUENCY_DISCOUNT_LABELS[id]})`
+                  : ""}
+              </option>
+            ))}
+          </select>
+        </SelectField>
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <p className="text-xs font-semibold">Add-ons</p>
+            <p className="text-[11px] text-muted">
+              {form.addons.length === 0
+                ? "Tap to add"
+                : `+${formatUSD(breakdownAddons)}`}
+            </p>
+          </div>
+          <div className="grid grid-cols-5 gap-1.5">
+            {(Object.keys(ADDON_ICONS) as AddonId[]).map((id) => {
+              const selected = form.addons.includes(id);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => toggleAddon(id)}
+                  className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2 ${
+                    selected
+                      ? "border-teal bg-teal text-white"
+                      : "border-line bg-cream/80"
+                  }`}
+                >
+                  <span className={selected ? "text-white" : "text-teal"}>
+                    {ADDON_ICONS[id].icon}
+                  </span>
+                  <span className="text-[9px] font-semibold">
+                    {ADDON_ICONS[id].short}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {form.addons.length > 0 ? (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {form.addons.map((id) => (
+                <li
+                  key={id}
+                  className="inline-flex items-center gap-1 rounded-full bg-teal-light px-2.5 py-1 text-[11px] font-medium text-teal-dark"
+                >
+                  {ADDON_META[id].label} +{formatUSD(ADDON_PRICES[id])}
+                  <button type="button" onClick={() => toggleAddon(id)}>
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal">
+        Step 2 of 2 · Contact & schedule
+      </p>
+      <SelectField label="What do you need?">
+        <select
+          className={selectClass}
+          value={form.intent}
+          onChange={(e) => update("intent", e.target.value as Intent)}
+        >
+          <option value="book">Request a booking date</option>
+          <option value="quote">Quote only — schedule later</option>
+        </select>
+      </SelectField>
+      {form.intent === "book" ? (
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold">
+              Preferred date
+            </span>
+            <input
+              type="date"
+              value={form.preferredDate}
+              onChange={(e) => update("preferredDate", e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <SelectField label="Time window">
+            <select
+              className={selectClass}
+              value={form.timeWindow}
+              onChange={(e) => update("timeWindow", e.target.value)}
+            >
+              {TIME_WINDOWS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </SelectField>
+        </div>
+      ) : (
+        <p className="rounded-xl bg-sky/50 px-3 py-2 text-xs text-muted">
+          We will email your estimate. No upfront payment.
         </p>
-        <p className="mt-1 text-sm text-muted">
-          {FREQUENCY_LABELS[form.frequency]}
-          {breakdown.frequencyDiscount > 0
-            ? ` · saves ${formatUSD(breakdown.frequencyDiscount)}`
-            : ""}
-        </p>
-        <ul className="mt-5 space-y-2 text-sm text-muted">
-          <li className="flex justify-between gap-3">
-            <span>Base (size + service)</span>
-            <span>{formatUSD(breakdown.base)}</span>
-          </li>
-          <li className="flex justify-between gap-3">
-            <span>Bedrooms</span>
-            <span>{formatUSD(breakdown.bedrooms)}</span>
-          </li>
-          <li className="flex justify-between gap-3">
-            <span>Bathrooms</span>
-            <span>{formatUSD(breakdown.bathrooms)}</span>
-          </li>
-          <li className="flex justify-between gap-3">
-            <span>Add-ons</span>
-            <span>{formatUSD(breakdown.addons)}</span>
-          </li>
-        </ul>
-        <p className="mt-5 rounded-xl bg-white/70 px-3 py-3 text-xs leading-relaxed text-muted">
-          Estimate only — final price confirmed if the home differs from the
-          details provided. <strong>Pay after cleaning</strong>, never upfront.
-        </p>
-      </aside>
+      )}
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold">Name</span>
+          <input
+            className={inputClass}
+            value={form.name}
+            onChange={(e) => update("name", e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold">ZIP</span>
+          <input
+            className={inputClass}
+            value={form.zip}
+            onChange={(e) => update("zip", e.target.value)}
+          />
+        </label>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold">Email</span>
+          <input
+            type="email"
+            className={inputClass}
+            value={form.email}
+            onChange={(e) => update("email", e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold">Phone</span>
+          <input
+            type="tel"
+            className={inputClass}
+            value={form.phone}
+            onChange={(e) => update("phone", e.target.value)}
+          />
+        </label>
+      </div>
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-semibold">
+          Notes (optional)
+        </span>
+        <input
+          className={inputClass}
+          value={form.notes}
+          onChange={(e) => update("notes", e.target.value)}
+        />
+      </label>
     </div>
   );
 }

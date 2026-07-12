@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Source_Sans_3 } from "next/font/google";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { MobileStickyCta } from "@/components/MobileStickyCta";
+import { SiteShell } from "@/components/SiteShell";
 import { JsonLd, localBusinessJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
@@ -57,10 +55,7 @@ export default function RootLayout({
     <html lang="en" className={`${fraunces.variable} ${sourceSans.variable} h-full`}>
       <body className="atmosphere flex min-h-full flex-col antialiased">
         <JsonLd data={localBusinessJsonLd()} />
-        <Header />
-        <main className="flex-1 pb-24 md:pb-0">{children}</main>
-        <Footer />
-        <MobileStickyCta />
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import {
   Breadcrumbs,
   CtaBand,
@@ -149,7 +150,12 @@ export default async function ServicePage({
             title="Estimate this service"
             description="Pre-selected for you — adjust size, frequency, and add-ons as needed."
           />
-          <BookingCalculator defaultService={service.id} />
+          <div className="md:hidden">
+            <QuoteLaunchCard />
+          </div>
+          <div className="hidden md:block">
+            <BookingCalculator defaultService={service.id} />
+          </div>
         </section>
 
         {related.length > 0 ? (

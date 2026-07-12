@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import {
   Breadcrumbs,
   CtaBand,
@@ -122,7 +123,12 @@ export default async function AreaPage({
             title={`Get a cleaning quote in ${area.name}`}
             description="Tell us your home size and schedule — pay only after cleaning."
           />
-          <BookingCalculator />
+          <div className="md:hidden">
+            <QuoteLaunchCard />
+          </div>
+          <div className="hidden md:block">
+            <BookingCalculator />
+          </div>
         </section>
       </div>
       <CtaBand title={`Book cleaning in ${area.name}`} />
