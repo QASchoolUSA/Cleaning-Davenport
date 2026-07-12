@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --teal: #0b6e6e;
+  --teal-dark: #085858;
+  --teal-light: #e7f4f4;
+  --mint: #d8f0ec;
+  --sky: #e8f3f8;
+  --cream: #f7f5f1;
+  --coral: #e07a4a;
+  --coral-dark: #c96538;
+  --charcoal: #1c2423;
+  --muted: #5a6866;
+  --line: #d5e0de;
+  --white: #ffffff;
+  --background: var(--cream);
+  --foreground: var(--charcoal);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-teal: var(--teal);
+  --color-teal-dark: var(--teal-dark);
+  --color-teal-light: var(--teal-light);
+  --color-mint: var(--mint);
+  --color-sky: var(--sky);
+  --color-cream: var(--cream);
+  --color-coral: var(--coral);
+  --color-coral-dark: var(--coral-dark);
+  --color-charcoal: var(--charcoal);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --font-sans: var(--font-source-sans);
+  --font-display: var(--font-fraunces);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-source-sans), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--teal) 25%, white);
+}
+
+.atmosphere {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, var(--mint), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 90% 0%, var(--sky), transparent 50%),
+    linear-gradient(180deg, #f3faf8 0%, var(--cream) 40%, #eef6f4 100%);
+}
+
+.texture-dots {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--teal) 12%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 18px 18px;
+}
+
+.prose-clean p {
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 1.1rem;
+}
+
+.prose-clean p:last-child {
+  margin-bottom: 0;
 }
