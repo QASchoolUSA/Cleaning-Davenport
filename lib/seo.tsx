@@ -16,10 +16,12 @@ export function localBusinessJsonLd() {
     "@context": "https://schema.org",
     "@type": ["LocalBusiness", "HomeAndConstructionBusiness"],
     name: siteConfig.name,
-    description: siteConfig.description,
+    description: `${siteConfig.description} ${siteConfig.serviceAreaPolicy}`,
     url: siteConfig.url,
     email: siteConfig.email,
     ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}),
+    logo: absoluteUrl(siteConfig.logoPath),
+    image: absoluteUrl(siteConfig.logoPath),
     address: {
       "@type": "PostalAddress",
       addressLocality: siteConfig.address.city,
@@ -34,6 +36,7 @@ export function localBusinessJsonLd() {
         name: "Florida",
       },
     },
+    ...(siteConfig.sameAs.length > 0 ? { sameAs: [...siteConfig.sameAs] } : {}),
     priceRange: "$$",
     openingHoursSpecification: {
       "@type": "OpeningHoursSpecification",
@@ -99,6 +102,27 @@ export function serviceJsonLd(input: {
       "@type": "City",
       name: "Davenport",
     },
+  };
+}
+
+export function howToJsonLd(opts: {
+  name: string;
+  description: string;
+  steps: { name: string; text: string }[];
+  url?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: opts.name,
+    description: opts.description,
+    ...(opts.url ? { url: opts.url } : {}),
+    step: opts.steps.map((step, index) => ({
+      "@type": "HowToStep",
+      position: index + 1,
+      name: step.name,
+      text: step.text,
+    })),
   };
 }
 

@@ -8,7 +8,7 @@ export const siteConfig = {
   email: "info@cleaningdavenport.com",
   /** Booking Broom site_slug */
   bookingSlug: "davenport",
-  phone: null as string | null, // Add when provided
+  phone: null as string | null, // Add when a real number is assigned
   address: {
     city: "Davenport",
     state: "FL",
@@ -16,9 +16,13 @@ export const siteConfig = {
     country: "US",
   },
   serviceAreaLabel: "Davenport, FL and nearby Central Florida communities",
-  social: {
-    // placeholders for future
-  },
+  serviceAreaPolicy:
+    "Cleaning Davenport is a mobile, service-area business. We do not publish a public storefront address.",
+  /** Verified profile URLs only — empty until profiles exist */
+  sameAs: [] as readonly string[],
+  logoPath: "/favicon.ico",
+  ogImagePath: "/og-default.png",
+  social: {} as Record<string, string>,
 } as const;
 
 export const navLinks = [

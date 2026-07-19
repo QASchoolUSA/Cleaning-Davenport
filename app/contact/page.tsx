@@ -35,14 +35,19 @@ export default function ContactPage() {
                 {siteConfig.email}
               </a>
             </p>
-            <p>
-              <span className="font-semibold text-charcoal">Phone:</span>{" "}
-              <span className="text-muted">Coming soon</span>
-            </p>
+            {siteConfig.phone ? (
+              <p>
+                <span className="font-semibold text-charcoal">Phone:</span>{" "}
+                <a className="text-teal hover:underline" href={`tel:${siteConfig.phone}`}>
+                  {siteConfig.phone}
+                </a>
+              </p>
+            ) : null}
             <p>
               <span className="font-semibold text-charcoal">Service area:</span>{" "}
               <span className="text-muted">{siteConfig.serviceAreaLabel}</span>
             </p>
+            <p className="text-muted">{siteConfig.serviceAreaPolicy}</p>
           </div>
         </div>
 

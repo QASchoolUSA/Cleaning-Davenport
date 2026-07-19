@@ -5,14 +5,35 @@ import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import { CtaBand, FaqList, ReviewCard, SectionHeading } from "@/components/ui";
 import { areas } from "@/lib/areas";
 import { reviews, siteFaqs } from "@/lib/content";
-import { JsonLd, faqJsonLd } from "@/lib/seo";
+import { JsonLd, absoluteUrl, faqJsonLd, howToJsonLd } from "@/lib/seo";
 import { services } from "@/lib/services";
 import { siteConfig } from "@/lib/site";
+
+const homeHowTo = howToJsonLd({
+  name: "How Cleaning Davenport works",
+  description: "Quote in minutes, get cleaned, then pay after the visit.",
+  url: absoluteUrl("/"),
+  steps: [
+    {
+      name: "Build your estimate",
+      text: "Choose service, square footage, bedrooms, bathrooms, frequency, and add-ons.",
+    },
+    {
+      name: "Request a date or quote",
+      text: "Book a preferred window or just save the quote. No card required.",
+    },
+    {
+      name: "We clean — you pay after",
+      text: "Our team completes the visit. Payment happens after the work is done.",
+    },
+  ],
+});
 
 export default function HomePage() {
   return (
     <>
       <JsonLd data={faqJsonLd(siteFaqs.slice(0, 4))} />
+      <JsonLd data={homeHowTo} />
 
       <section className="relative min-h-[88vh] overflow-hidden">
         <Image

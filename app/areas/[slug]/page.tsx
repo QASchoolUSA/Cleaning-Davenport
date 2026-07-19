@@ -46,12 +46,19 @@ export default async function AreaPage({
   const { slug } = await params;
   const area = getAreaBySlug(slug);
   if (!area) notFound();
+  const areaFaqs = [
+    ...area.faqs,
+    {
+      question: `What details should I share before booking in ${area.name}?`,
+      answer: `Provide the full address, home size, bathrooms, service type, preferred date, pets, parking or gate instructions, and any specialty surfaces. That helps confirm coverage and creates a more accurate scope for ${area.name}.`,
+    },
+  ];
 
   return (
     <>
       <JsonLd
         data={[
-          faqJsonLd(area.faqs),
+          faqJsonLd(areaFaqs),
           breadcrumbJsonLd([
             { name: "Home", path: "/" },
             { name: "Service Areas", path: "/service-areas" },
@@ -90,6 +97,14 @@ export default async function AreaPage({
             {area.longContent.map((p) => (
               <p key={p.slice(0, 28)}>{p}</p>
             ))}
+            <h2>How to prepare for a cleaning visit in {area.name}</h2>
+            <p>
+              Clear personal items from priority counters and floors, secure pets,
+              and provide entry, parking, gate, or building instructions before
+              arrival. Note specialty stone, wood, or floor finishes and separate
+              ordinary cleaning from repairs, hauling, pest work, or active mold
+              remediation.
+            </p>
           </article>
           <aside className="rounded-2xl border border-line bg-white p-6">
             <h2 className="font-display text-2xl">Neighborhoods & pockets</h2>
@@ -115,7 +130,7 @@ export default async function AreaPage({
 
         <section className="mt-16">
           <SectionHeading title={`FAQ for ${area.name}`} />
-          <FaqList items={area.faqs} />
+          <FaqList items={areaFaqs} />
         </section>
 
         <section className="mt-16">

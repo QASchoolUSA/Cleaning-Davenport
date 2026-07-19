@@ -34,11 +34,20 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} | Professional Cleaning in Davenport, FL`,
     description: siteConfig.description,
+    images: [
+      {
+        url: siteConfig.ogImagePath,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} — professional cleaning in Davenport, FL`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} | Davenport, FL`,
     description: siteConfig.description,
+    images: [siteConfig.ogImagePath],
   },
   robots: {
     index: true,

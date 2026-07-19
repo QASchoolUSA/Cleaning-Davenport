@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, CtaBand } from "@/components/ui";
 import { blogPosts, getPostBySlug } from "@/lib/blog";
-import { JsonLd, breadcrumbJsonLd, pageTitle } from "@/lib/seo";
+import { JsonLd, breadcrumbJsonLd, faqJsonLd, pageTitle } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -69,6 +69,7 @@ export default async function BlogPostPage({
             { name: "Blog", path: "/blog" },
             { name: post.title, path: `/blog/${post.slug}` },
           ]),
+          faqJsonLd(post.faqs),
         ]}
       />
       <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
@@ -99,6 +100,26 @@ export default async function BlogPostPage({
         <div className="prose-clean mt-10">
           {post.content.map((p) => (
             <p key={p.slice(0, 40)}>{p}</p>
+          ))}
+          {post.sections.map((section) => (
+            <section key={section.heading}>
+              <h2>{section.heading}</h2>
+              {section.paragraphs.map((paragraph) => (
+                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+              ))}
+              {section.bullets && (
+                <ul>
+                  {section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
+                </ul>
+              )}
+            </section>
+          ))}
+          <h2>Frequently asked questions</h2>
+          {post.faqs.map((faq) => (
+            <section key={faq.question}>
+              <h3>{faq.question}</h3>
+              <p>{faq.answer}</p>
+            </section>
           ))}
         </div>
         <div className="mt-10 flex flex-wrap gap-2">

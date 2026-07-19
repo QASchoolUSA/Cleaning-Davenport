@@ -6,7 +6,7 @@ import { pageTitle } from "@/lib/seo";
 import { services } from "@/lib/services";
 
 export const metadata: Metadata = {
-  title: pageTitle("Cleaning Services in Davenport, FL"),
+  title: pageTitle("Our Cleaning Services"),
   description:
     "Explore house, apartment, Airbnb, move-in/out, deep, maintenance, and post-construction cleaning services from Cleaning Davenport.",
   alternates: { canonical: "/services" },
