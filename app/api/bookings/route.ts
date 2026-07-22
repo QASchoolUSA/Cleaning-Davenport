@@ -47,12 +47,16 @@ export async function POST(request: Request) {
     };
 
     const dir = path.join(process.cwd(), "data", "bookings");
-    await mkdir(dir, { recursive: true });
-    await writeFile(
-      path.join(dir, `${record.id}.json`),
-      JSON.stringify(record, null, 2),
-      "utf8",
-    );
+    try {
+      await mkdir(dir, { recursive: true });
+      await writeFile(
+        path.join(dir, `${record.id}.json`),
+        JSON.stringify(record, null, 2),
+        "utf8",
+      );
+    } catch (persistError) {
+      console.warn("[booking] local persist skipped:", persistError);
+    }
 
     console.log(
       "[booking]",

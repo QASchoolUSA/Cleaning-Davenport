@@ -3,6 +3,7 @@
  * No-ops when BOOKING_BROOM_URL / BOOKING_BROOM_API_KEY are unset.
  */
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import {
   ADDON_META,
   ADDON_PRICES,
@@ -41,6 +42,21 @@ export interface BookingBroomResult {
   forwarded: boolean;
   id?: string;
   error?: string;
+}
+
+function readEnv(name: string): string | undefined {
+  const fromProcess = process.env[name];
+  if (fromProcess) return fromProcess;
+
+  try {
+    const { env } = getCloudflareContext();
+    const fromWorker = env[name as keyof typeof env];
+    if (typeof fromWorker === "string") return fromWorker;
+  } catch {
+    // Not running inside the Cloudflare worker (e.g. next dev).
+  }
+
+  return undefined;
 }
 
 function buildNotes(body: CalculatorBookingBody, localId: string): string {
@@ -98,8 +114,8 @@ function resolveServiceType(body: CalculatorBookingBody): string {
 
 export function isBookingBroomConfigured(): boolean {
   return Boolean(
-    process.env.BOOKING_BROOM_URL?.trim() &&
-      process.env.BOOKING_BROOM_API_KEY?.trim(),
+    readEnv("BOOKING_BROOM_URL")?.trim() &&
+      readEnv("BOOKING_BROOM_API_KEY")?.trim(),
   );
 }
 
@@ -107,10 +123,10 @@ export async function forwardToBookingBroom(
   body: CalculatorBookingBody,
   localId: string,
 ): Promise<BookingBroomResult> {
-  const baseUrl = process.env.BOOKING_BROOM_URL?.replace(/\/$/, "").trim();
-  const apiKey = process.env.BOOKING_BROOM_API_KEY?.trim();
+  const baseUrl = readEnv("BOOKING_BROOM_URL")?.replace(/\/$/, "").trim();
+  const apiKey = readEnv("BOOKING_BROOM_API_KEY")?.trim();
   const siteSlug =
-    process.env.BOOKING_BROOM_SITE_SLUG?.trim() || siteConfig.bookingSlug;
+    readEnv("BOOKING_BROOM_SITE_SLUG")?.trim() || siteConfig.bookingSlug;
 
   if (!baseUrl || !apiKey) {
     console.info(
