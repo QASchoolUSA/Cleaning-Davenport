@@ -11,8 +11,8 @@ SEO-first marketing site and booking calculator for **Cleaning Davenport** (Dave
 ## Develop
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
