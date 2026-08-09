@@ -47,15 +47,13 @@ export interface BookingBroomResult {
   error?: string;
 }
 
-/** Only what has no structured home: the customer's message and lead provenance. */
+/** Only what has no structured home: the customer's message and the local ID. */
 function buildNotes(body: CalculatorBookingBody, localId: string): string {
   const parts: string[] = [];
 
   if (body.notes?.trim()) parts.push(body.notes.trim());
 
   parts.push(`Local ID: ${localId}`);
-  if (body.intent) parts.push(`Intent: ${body.intent}`);
-  if (body.source) parts.push(`Source: ${body.source}`);
 
   if (body.estimate) {
     parts.push(
@@ -70,10 +68,18 @@ function buildProperty(body: CalculatorBookingBody, pricing: PricingConfig) {
   return {
     bedrooms: body.bedrooms ?? undefined,
     bathrooms: body.bathrooms ?? undefined,
-    // The calculator collects a band, so report the band rather than its midpoint.
+    // The calculator collects a band, so send both the number the customer
+    // picked and the band label it belongs to.
+    square_feet: body.sqft ?? undefined,
     size_label: body.sqft != null ? sqftPresetLabel(body.sqft, pricing) : undefined,
     home_type: body.serviceType ? resolveServiceType(body) : undefined,
   };
+}
+
+function buildIntent(body: CalculatorBookingBody): "quote" | "book" | undefined {
+  return body.intent === "quote" || body.intent === "book"
+    ? body.intent
+    : undefined;
 }
 
 function buildQuote(body: CalculatorBookingBody, pricing: PricingConfig) {
@@ -143,6 +149,10 @@ export async function forwardToBookingBroom(
         preferred_date: body.preferredDate || undefined,
         preferred_time: body.timeWindow || undefined,
         notes: buildNotes(body, localId),
+        intent: buildIntent(body),
+        attribution: body.source?.trim()
+          ? { utm_source: body.source.trim() }
+          : undefined,
         property: buildProperty(body, pricing),
         quote: buildQuote(body, pricing),
       }),

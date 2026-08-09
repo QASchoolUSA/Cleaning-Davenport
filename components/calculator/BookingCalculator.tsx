@@ -233,6 +233,11 @@ export function BookingCalculator({
     }));
   }
 
+  /** A crew cannot be dispatched to a ZIP, so a booking needs the street. */
+  function addressOk() {
+    return form.intent === "quote" || form.address.trim().length > 4;
+  }
+
   function canContinue() {
     if (!isApp) return true;
     if (step === 2 && form.intent === "book" && !form.preferredDate) return false;
@@ -242,6 +247,7 @@ export function BookingCalculator({
         form.email.includes("@") &&
         form.phone.trim().length >= 7 &&
         form.zip.trim().length >= 5 &&
+        addressOk() &&
         (form.intent === "quote" || !!form.preferredDate)
       );
     }
@@ -253,7 +259,8 @@ export function BookingCalculator({
       form.name.trim().length > 1 &&
       form.email.includes("@") &&
       form.phone.trim().length >= 7 &&
-      form.zip.trim().length >= 5;
+      form.zip.trim().length >= 5 &&
+      addressOk();
     if (form.intent === "book" && !form.preferredDate) return false;
     return contactOk;
   }
@@ -748,6 +755,21 @@ function AppStep({
         </label>
       </div>
       <label className="block">
+        <span className="mb-1 block text-xs font-semibold">
+          Street address{" "}
+          {form.intent === "quote" && (
+            <span className="font-normal text-muted">(optional)</span>
+          )}
+        </span>
+        <input
+          className={inputClass}
+          value={form.address}
+          onChange={(e) => update("address", e.target.value)}
+          autoComplete="street-address"
+          placeholder="123 Orange Blossom Dr"
+        />
+      </label>
+      <label className="block">
         <span className="mb-1 block text-xs font-semibold">Email</span>
         <input
           type="email"
@@ -980,6 +1002,21 @@ function EmbeddedSteps({
           />
         </label>
       </div>
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-semibold">
+          Street address{" "}
+          {form.intent === "quote" && (
+            <span className="font-normal text-muted">(optional)</span>
+          )}
+        </span>
+        <input
+          className={inputClass}
+          value={form.address}
+          onChange={(e) => update("address", e.target.value)}
+          autoComplete="street-address"
+          placeholder="123 Orange Blossom Dr"
+        />
+      </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
           <span className="mb-1.5 block text-xs font-semibold">Email</span>

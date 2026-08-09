@@ -20,5 +20,7 @@ returns **502**.
 ## Payload
 
 Calculator body stays camelCase. Server maps to Booking Broom snake_case
-(`customer_name`, `service_type`, etc.) and packs estimate / home details into
-`notes`. See `lib/booking-broom.ts`.
+(`customer_name`, `service_type`, etc.), sends home and estimate details as the
+structured `property`, `quote`, `intent` and `attribution` fields, and leaves
+only the customer's message and the estimate breakdown in `notes`. See
+`lib/booking-broom.ts`.
