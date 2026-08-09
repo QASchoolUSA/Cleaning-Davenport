@@ -562,51 +562,28 @@ function AppStep({
     return (
       <div className="space-y-4">
         <h2 className="font-display text-2xl text-charcoal">About your home</h2>
-        <SelectField label="Size">
-          <select
-            className={selectClass}
-            value={
-              SQFT_PRESETS.some((p) => p.value === form.sqft)
-                ? form.sqft
-                : SQFT_PRESETS[2].value
-            }
-            onChange={(e) => update("sqft", Number(e.target.value))}
-          >
-            {SQFT_PRESETS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label} (~{p.value.toLocaleString()} sq ft)
-              </option>
-            ))}
-          </select>
-        </SelectField>
-        <div className="grid grid-cols-2 gap-3">
-          <SelectField label="Bedrooms">
-            <select
-              className={selectClass}
-              value={form.bedrooms}
-              onChange={(e) => update("bedrooms", Number(e.target.value))}
-            >
-              {Array.from({ length: 9 }, (_, i) => (
-                <option key={i} value={i}>
-                  {i === 0 ? "Studio" : i}
-                </option>
-              ))}
-            </select>
-          </SelectField>
-          <SelectField label="Bathrooms">
-            <select
-              className={selectClass}
-              value={form.bathrooms}
-              onChange={(e) => update("bathrooms", Number(e.target.value))}
-            >
-              {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </SelectField>
-        </div>
+        <PillField
+          label="Bedrooms"
+          options={BEDROOM_CHOICES}
+          value={Math.min(form.bedrooms, 5)}
+          onChange={(value) => update("bedrooms", value)}
+        />
+        <PillField
+          label="Bathrooms"
+          options={BATHROOM_CHOICES}
+          value={Math.min(form.bathrooms, 5)}
+          onChange={(value) => update("bathrooms", value)}
+        />
+        <PillField
+          label="Size"
+          options={SQFT_PRESETS}
+          value={
+            SQFT_PRESETS.some((p) => p.value === form.sqft)
+              ? form.sqft
+              : SQFT_PRESETS[2].value
+          }
+          onChange={(value) => update("sqft", value)}
+        />
         <SelectField label="How often">
           <select
             className={selectClass}
@@ -825,54 +802,28 @@ function EmbeddedSteps({
             ))}
           </select>
         </SelectField>
-        <SelectField label="Home size">
-          <select
-            className={selectClass}
-            value={
-              SQFT_PRESETS.some((p) => p.value === form.sqft)
-                ? form.sqft
-                : "custom"
-            }
-            onChange={(e) => {
-              if (e.target.value === "custom") return;
-              update("sqft", Number(e.target.value));
-            }}
-          >
-            {SQFT_PRESETS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label} (~{p.value.toLocaleString()} sq ft)
-              </option>
-            ))}
-          </select>
-        </SelectField>
-        <div className="grid grid-cols-2 gap-3">
-          <SelectField label="Bedrooms">
-            <select
-              className={selectClass}
-              value={form.bedrooms}
-              onChange={(e) => update("bedrooms", Number(e.target.value))}
-            >
-              {Array.from({ length: 9 }, (_, i) => (
-                <option key={i} value={i}>
-                  {i === 0 ? "Studio / 0" : i}
-                </option>
-              ))}
-            </select>
-          </SelectField>
-          <SelectField label="Bathrooms">
-            <select
-              className={selectClass}
-              value={form.bathrooms}
-              onChange={(e) => update("bathrooms", Number(e.target.value))}
-            >
-              {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </SelectField>
-        </div>
+        <PillField
+          label="Bedrooms"
+          options={BEDROOM_CHOICES}
+          value={Math.min(form.bedrooms, 5)}
+          onChange={(value) => update("bedrooms", value)}
+        />
+        <PillField
+          label="Bathrooms"
+          options={BATHROOM_CHOICES}
+          value={Math.min(form.bathrooms, 5)}
+          onChange={(value) => update("bathrooms", value)}
+        />
+        <PillField
+          label="Home size"
+          options={SQFT_PRESETS}
+          value={
+            SQFT_PRESETS.some((p) => p.value === form.sqft)
+              ? form.sqft
+              : SQFT_PRESETS[2].value
+          }
+          onChange={(value) => update("sqft", value)}
+        />
         <SelectField label="How often">
           <select
             className={selectClass}
@@ -1059,3 +1010,55 @@ function SelectField({
     </label>
   );
 }
+
+/** One tap per answer; a dropdown costs two and hides the options. */
+function PillField<T extends number | string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: readonly { label: string; value: T }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <fieldset className="block">
+      <legend className="mb-1.5 block text-xs font-semibold text-charcoal">
+        {label}
+      </legend>
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
+        {options.map((option) => {
+          const selected = option.value === value;
+          return (
+            <button
+              key={String(option.value)}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(option.value)}
+              className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition-colors ${
+                selected
+                  ? "border-teal bg-teal text-white"
+                  : "border-line bg-white text-charcoal hover:border-teal"
+              }`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+const BEDROOM_CHOICES = Array.from({ length: 6 }, (_, i) => ({
+  value: i,
+  label: i === 0 ? "Studio" : i === 5 ? "5+" : String(i),
+}));
+
+const BATHROOM_CHOICES = Array.from({ length: 5 }, (_, i) => ({
+  value: i + 1,
+  label: i + 1 === 5 ? "5+" : String(i + 1),
+}));

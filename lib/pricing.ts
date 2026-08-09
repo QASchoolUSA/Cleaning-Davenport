@@ -145,13 +145,25 @@ export const ADDON_META: Record<
   },
 };
 
+/**
+ * Square footage is picked as a band. `value` is the midpoint the estimate is
+ * built from; `label` is what the customer chose and what gets reported, since
+ * they never gave an exact figure.
+ */
 export const SQFT_PRESETS = [
-  { label: "Studio / small", value: 600 },
-  { label: "1–2 bed", value: 1000 },
-  { label: "3 bed", value: 1600 },
-  { label: "4 bed", value: 2200 },
-  { label: "Large home", value: 3000 },
+  { label: "Under 800 sq ft", value: 600 },
+  { label: "800–1,200 sq ft", value: 1000 },
+  { label: "1,200–2,000 sq ft", value: 1600 },
+  { label: "2,000–2,600 sq ft", value: 2200 },
+  { label: "2,600+ sq ft", value: 3000 },
 ] as const;
+
+export function sqftPresetLabel(value: number): string {
+  const closest = SQFT_PRESETS.reduce((best, preset) =>
+    Math.abs(preset.value - value) < Math.abs(best.value - value) ? preset : best,
+  );
+  return closest.label;
+}
 
 export function calculatePrice(input: PricingInput): PriceBreakdown {
   const sqft = Math.max(400, Math.min(6000, input.sqft));

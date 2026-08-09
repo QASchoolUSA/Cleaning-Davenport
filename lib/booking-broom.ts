@@ -9,6 +9,7 @@ import {
   ADDON_PRICES,
   FREQUENCY_LABELS,
   formatUSD,
+  sqftPresetLabel,
   type AddonId,
   type FrequencyId,
   type PriceBreakdown,
@@ -59,6 +60,7 @@ function readEnv(name: string): string | undefined {
   return undefined;
 }
 
+/** Only what has no structured home: the customer's message and lead provenance. */
 function buildNotes(body: CalculatorBookingBody, localId: string): string {
   const parts: string[] = [];
 
@@ -68,38 +70,38 @@ function buildNotes(body: CalculatorBookingBody, localId: string): string {
   if (body.intent) parts.push(`Intent: ${body.intent}`);
   if (body.source) parts.push(`Source: ${body.source}`);
 
-  const details: string[] = [];
-  if (body.sqft != null) details.push(`sqft: ${body.sqft}`);
-  if (body.bedrooms != null) details.push(`bedrooms: ${body.bedrooms}`);
-  if (body.bathrooms != null) details.push(`bathrooms: ${body.bathrooms}`);
-  if (body.frequency) {
-    details.push(
-      `frequency: ${FREQUENCY_LABELS[body.frequency] ?? body.frequency}`,
-    );
-  }
-  if (details.length > 0) parts.push(`Home: ${details.join("; ")}`);
-
-  if (body.addons && body.addons.length > 0) {
-    parts.push(
-      "Add-ons: " +
-        body.addons
-          .map((id) => {
-            const label = ADDON_META[id]?.label ?? id;
-            const price = ADDON_PRICES[id];
-            return price != null ? `${label} (${formatUSD(price)})` : label;
-          })
-          .join("; "),
-    );
-  }
-
   if (body.estimate) {
-    parts.push(`Estimate total: ${formatUSD(body.estimate.total)}`);
     parts.push(
       `Estimate breakdown: base ${formatUSD(body.estimate.base)}, bedrooms ${formatUSD(body.estimate.bedrooms)}, bathrooms ${formatUSD(body.estimate.bathrooms)}, add-ons ${formatUSD(body.estimate.addons)}, subtotal ${formatUSD(body.estimate.subtotal)}`,
     );
   }
 
   return parts.join("\n");
+}
+
+function buildProperty(body: CalculatorBookingBody) {
+  return {
+    bedrooms: body.bedrooms ?? undefined,
+    bathrooms: body.bathrooms ?? undefined,
+    // The calculator collects a band, so report the band rather than its midpoint.
+    size_label: body.sqft != null ? sqftPresetLabel(body.sqft) : undefined,
+    home_type: body.serviceType ? resolveServiceType(body) : undefined,
+  };
+}
+
+function buildQuote(body: CalculatorBookingBody) {
+  return {
+    estimate: body.estimate?.total,
+    currency: "USD",
+    frequency: body.frequency
+      ? (FREQUENCY_LABELS[body.frequency] ?? body.frequency)
+      : undefined,
+    add_ons: body.addons?.map((id) => ({
+      label: ADDON_META[id]?.label ?? id,
+      price: ADDON_PRICES[id],
+    })),
+    payment_terms: "Due after cleaning is complete",
+  };
 }
 
 function resolveAddress(body: CalculatorBookingBody): string {
@@ -150,6 +152,8 @@ export async function forwardToBookingBroom(
         preferred_date: body.preferredDate || undefined,
         preferred_time: body.timeWindow || undefined,
         notes: buildNotes(body, localId),
+        property: buildProperty(body),
+        quote: buildQuote(body),
       }),
     });
 
