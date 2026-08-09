@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { BookingCalculatorServer } from "@/components/calculator/BookingCalculatorServer";
 import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import {
   Breadcrumbs,
@@ -142,7 +142,7 @@ export default async function AreaPage({
             <QuoteLaunchCard />
           </div>
           <div className="hidden md:block">
-            <BookingCalculator />
+            <BookingCalculatorServer />
           </div>
         </section>
       </div>

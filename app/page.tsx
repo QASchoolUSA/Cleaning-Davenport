@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { BookingCalculatorServer } from "@/components/calculator/BookingCalculatorServer";
 import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import { CtaBand, FaqList, ReviewCard, SectionHeading } from "@/components/ui";
 import { areas } from "@/lib/areas";
@@ -157,7 +157,7 @@ export default function HomePage() {
         />
         <QuoteLaunchCard />
         <div className="hidden md:block">
-          <BookingCalculator />
+          <BookingCalculatorServer />
         </div>
       </section>
 

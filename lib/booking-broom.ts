@@ -3,16 +3,18 @@
  * No-ops when BOOKING_BROOM_URL / BOOKING_BROOM_API_KEY are unset.
  */
 
-import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { readEnv } from "./env";
 import {
   ADDON_META,
-  ADDON_PRICES,
-  FREQUENCY_LABELS,
+  DEFAULT_PRICING_CONFIG,
+  addOnPrices,
   formatUSD,
+  frequencyLabels,
   sqftPresetLabel,
   type AddonId,
   type FrequencyId,
   type PriceBreakdown,
+  type PricingConfig,
   type ServiceTypeId,
 } from "./pricing";
 import { getServiceById } from "./services";
@@ -45,21 +47,6 @@ export interface BookingBroomResult {
   error?: string;
 }
 
-function readEnv(name: string): string | undefined {
-  const fromProcess = process.env[name];
-  if (fromProcess) return fromProcess;
-
-  try {
-    const { env } = getCloudflareContext();
-    const fromWorker = env[name as keyof typeof env];
-    if (typeof fromWorker === "string") return fromWorker;
-  } catch {
-    // Not running inside the Cloudflare worker (e.g. next dev).
-  }
-
-  return undefined;
-}
-
 /** Only what has no structured home: the customer's message and lead provenance. */
 function buildNotes(body: CalculatorBookingBody, localId: string): string {
   const parts: string[] = [];
@@ -79,26 +66,29 @@ function buildNotes(body: CalculatorBookingBody, localId: string): string {
   return parts.join("\n");
 }
 
-function buildProperty(body: CalculatorBookingBody) {
+function buildProperty(body: CalculatorBookingBody, pricing: PricingConfig) {
   return {
     bedrooms: body.bedrooms ?? undefined,
     bathrooms: body.bathrooms ?? undefined,
     // The calculator collects a band, so report the band rather than its midpoint.
-    size_label: body.sqft != null ? sqftPresetLabel(body.sqft) : undefined,
+    size_label: body.sqft != null ? sqftPresetLabel(body.sqft, pricing) : undefined,
     home_type: body.serviceType ? resolveServiceType(body) : undefined,
   };
 }
 
-function buildQuote(body: CalculatorBookingBody) {
+function buildQuote(body: CalculatorBookingBody, pricing: PricingConfig) {
+  const labels = frequencyLabels(pricing);
+  const prices = addOnPrices(pricing);
+
   return {
     estimate: body.estimate?.total,
     currency: "USD",
     frequency: body.frequency
-      ? (FREQUENCY_LABELS[body.frequency] ?? body.frequency)
+      ? (labels[body.frequency] ?? body.frequency)
       : undefined,
     add_ons: body.addons?.map((id) => ({
       label: ADDON_META[id]?.label ?? id,
-      price: ADDON_PRICES[id],
+      price: prices[id],
     })),
     payment_terms: "Due after cleaning is complete",
   };
@@ -124,6 +114,7 @@ export function isBookingBroomConfigured(): boolean {
 export async function forwardToBookingBroom(
   body: CalculatorBookingBody,
   localId: string,
+  pricing: PricingConfig = DEFAULT_PRICING_CONFIG,
 ): Promise<BookingBroomResult> {
   const baseUrl = readEnv("BOOKING_BROOM_URL")?.replace(/\/$/, "").trim();
   const apiKey = readEnv("BOOKING_BROOM_API_KEY")?.trim();
@@ -152,8 +143,8 @@ export async function forwardToBookingBroom(
         preferred_date: body.preferredDate || undefined,
         preferred_time: body.timeWindow || undefined,
         notes: buildNotes(body, localId),
-        property: buildProperty(body),
-        quote: buildQuote(body),
+        property: buildProperty(body, pricing),
+        quote: buildQuote(body, pricing),
       }),
     });
 

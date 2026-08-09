@@ -3,13 +3,29 @@ import Link from "next/link";
 import { Breadcrumbs, CtaBand, SectionHeading } from "@/components/ui";
 import {
   ADDON_META,
-  ADDON_PRICES,
-  FREQUENCY_DISCOUNT_LABELS,
-  FREQUENCY_LABELS,
+  addOnPrices,
   formatUSD,
+  frequencyDiscountLabels,
+  frequencyLabels,
+  minimumBase,
+  type AddonId,
+  type FrequencyId,
+  type ServiceTypeId,
 } from "@/lib/pricing";
+import { getPricingConfig } from "@/lib/pricing-config";
 import { pageTitle } from "@/lib/seo";
-import { services } from "@/lib/services";
+import { getServiceById, services } from "@/lib/services";
+
+/** Order the starting-price table reads best in, cheapest tiers first. */
+const STARTING_POINT_ORDER: ServiceTypeId[] = [
+  "house",
+  "apartment",
+  "maintenance",
+  "deep",
+  "airbnb",
+  "move",
+  "post-construction",
+];
 
 export const metadata: Metadata = {
   title: pageTitle("Cleaning Prices in Davenport, FL"),
@@ -18,7 +34,17 @@ export const metadata: Metadata = {
   alternates: { canonical: "/pricing" },
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const config = await getPricingConfig();
+  const FREQUENCY_LABELS = frequencyLabels(config);
+  const FREQUENCY_DISCOUNT_LABELS = frequencyDiscountLabels(config);
+  const ADDON_PRICES = addOnPrices(config);
+  const startingPoints = STARTING_POINT_ORDER.map((id) => ({
+    id,
+    name: getServiceById(id)?.shortName ?? id,
+    price: minimumBase(config)[id],
+  }));
+
   return (
     <>
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
@@ -78,18 +104,12 @@ export default function PricingPage() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  ["House cleaning", "$129"],
-                  ["Apartment cleaning", "$99"],
-                  ["Maintenance cleaning", "$109"],
-                  ["Deep cleaning", "$199"],
-                  ["Airbnb cleaning", "$149"],
-                  ["Move-out / move-in", "$189"],
-                  ["Post-construction", "$249"],
-                ].map(([name, price]) => (
-                  <tr key={name} className="border-t border-line">
-                    <td className="px-4 py-3">{name}</td>
-                    <td className="px-4 py-3 font-semibold text-teal">{price}</td>
+                {startingPoints.map((row) => (
+                  <tr key={row.id} className="border-t border-line">
+                    <td className="px-4 py-3">{row.name}</td>
+                    <td className="px-4 py-3 font-semibold text-teal">
+                      {formatUSD(row.price)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -101,7 +121,7 @@ export default function PricingPage() {
           <div>
             <h2 className="font-display text-3xl">Recurring savings</h2>
             <ul className="mt-5 space-y-3">
-              {(Object.keys(FREQUENCY_LABELS) as Array<keyof typeof FREQUENCY_LABELS>).map(
+              {(Object.keys(FREQUENCY_LABELS) as FrequencyId[]).map(
                 (id) => (
                   <li
                     key={id}
@@ -119,7 +139,7 @@ export default function PricingPage() {
           <div>
             <h2 className="font-display text-3xl">Popular add-ons</h2>
             <ul className="mt-5 space-y-3">
-              {(Object.keys(ADDON_META) as Array<keyof typeof ADDON_META>)
+              {(Object.keys(ADDON_META) as AddonId[])
                 .slice(0, 6)
                 .map((id) => (
                   <li

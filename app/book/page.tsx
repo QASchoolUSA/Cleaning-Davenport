@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BookingCalculator } from "@/components/calculator/BookingCalculator";
+import { BookingCalculatorServer } from "@/components/calculator/BookingCalculatorServer";
 import { Breadcrumbs } from "@/components/ui";
 import { pageTitle } from "@/lib/seo";
 
@@ -15,7 +15,7 @@ export default function BookPage() {
     <>
       {/* Mobile: full-screen app quote flow */}
       <div className="md:hidden">
-        <BookingCalculator variant="app" />
+        <BookingCalculatorServer variant="app" />
       </div>
 
       {/* Desktop / tablet: standard page */}
@@ -37,7 +37,7 @@ export default function BookPage() {
           add-ons. Pay after the cleaning is done.
         </p>
         <div className="mt-6 sm:mt-10">
-          <BookingCalculator variant="embedded" />
+          <BookingCalculatorServer variant="embedded" />
         </div>
       </div>
     </>

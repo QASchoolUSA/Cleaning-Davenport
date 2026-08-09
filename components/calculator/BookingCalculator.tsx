@@ -2,14 +2,15 @@
 
 import {
   ADDON_META,
-  ADDON_PRICES,
-  FREQUENCY_DISCOUNT_LABELS,
-  FREQUENCY_LABELS,
-  SQFT_PRESETS,
+  DEFAULT_PRICING_CONFIG,
+  addOnPrices,
   calculatePrice,
   formatUSD,
+  frequencyDiscountLabels,
+  frequencyLabels,
   type AddonId,
   type FrequencyId,
+  type PricingConfig,
   type ServiceTypeId,
 } from "@/lib/pricing";
 import { services } from "@/lib/services";
@@ -176,14 +177,17 @@ export function BookingCalculator({
   defaultService,
   defaultFrequency,
   variant = "embedded",
+  config = DEFAULT_PRICING_CONFIG,
 }: {
   compact?: boolean;
   defaultService?: ServiceTypeId;
   defaultFrequency?: FrequencyId;
   /** `app` = full-screen mobile quote flow with short steps, no nested scroll */
   variant?: "embedded" | "app";
+  config?: PricingConfig;
 }) {
   const isApp = variant === "app";
+  const FREQUENCY_LABELS = frequencyLabels(config);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>({
     ...initial,
@@ -202,15 +206,18 @@ export function BookingCalculator({
 
   const breakdown = useMemo(
     () =>
-      calculatePrice({
-        serviceType: form.serviceType,
-        sqft: form.sqft,
-        bedrooms: form.bedrooms,
-        bathrooms: form.bathrooms,
-        frequency: form.frequency,
-        addons: form.addons,
-      }),
-    [form],
+      calculatePrice(
+        {
+          serviceType: form.serviceType,
+          sqft: form.sqft,
+          bedrooms: form.bedrooms,
+          bathrooms: form.bathrooms,
+          frequency: form.frequency,
+          addons: form.addons,
+        },
+        config,
+      ),
+    [form, config],
   );
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -418,6 +425,7 @@ export function BookingCalculator({
               update={update}
               toggleAddon={toggleAddon}
               breakdownAddons={breakdown.addons}
+              config={config}
             />
           ) : (
             <EmbeddedSteps
@@ -426,6 +434,7 @@ export function BookingCalculator({
               update={update}
               toggleAddon={toggleAddon}
               breakdownAddons={breakdown.addons}
+              config={config}
             />
           )}
 
@@ -527,13 +536,18 @@ function AppStep({
   update,
   toggleAddon,
   breakdownAddons,
+  config,
 }: {
   step: number;
   form: FormState;
   update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
   toggleAddon: (id: AddonId) => void;
   breakdownAddons: number;
+  config: PricingConfig;
 }) {
+  const SQFT_PRESETS = config.sqftPresets;
+  const FREQUENCY_LABELS = frequencyLabels(config);
+  const FREQUENCY_DISCOUNT_LABELS = frequencyDiscountLabels(config);
   if (step === 0) {
     return (
       <div className="space-y-3">
@@ -774,13 +788,19 @@ function EmbeddedSteps({
   update,
   toggleAddon,
   breakdownAddons,
+  config,
 }: {
   step: number;
   form: FormState;
   update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
   toggleAddon: (id: AddonId) => void;
   breakdownAddons: number;
+  config: PricingConfig;
 }) {
+  const SQFT_PRESETS = config.sqftPresets;
+  const ADDON_PRICES = addOnPrices(config);
+  const FREQUENCY_LABELS = frequencyLabels(config);
+  const FREQUENCY_DISCOUNT_LABELS = frequencyDiscountLabels(config);
   if (step === 0) {
     return (
       <div className="space-y-3">

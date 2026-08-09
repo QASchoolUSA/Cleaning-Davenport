@@ -6,6 +6,7 @@ import {
   isBookingBroomConfigured,
   type CalculatorBookingBody,
 } from "@/lib/booking-broom";
+import { getPricingConfig } from "@/lib/pricing-config";
 
 export async function POST(request: Request) {
   try {
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
     let bookingBroomError: string | undefined;
 
     if (configured) {
-      const result = await forwardToBookingBroom(body, localId);
+      const pricing = await getPricingConfig();
+      const result = await forwardToBookingBroom(body, localId, pricing);
       if (result.forwarded) {
         bookingBroomStatus = "forwarded";
         bookingBroomId = result.id;
