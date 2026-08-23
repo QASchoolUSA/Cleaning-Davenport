@@ -31,7 +31,6 @@
     }
   ],
   "vars": {
-    "BOOKING_BROOM_SITE_SLUG": "davenport",
     "BOOKING_BROOM_API_KEY": "bb_davenport_dev_key"
   }
 }

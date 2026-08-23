@@ -10,7 +10,7 @@ are set.
 |----------|----------|---------|
 | `BOOKING_BROOM_URL` | for forward | `https://app.bookingbroom.com` or `http://localhost:3000` |
 | `BOOKING_BROOM_API_KEY` | for forward | `bb_davenport_dev_key` (local) |
-| `BOOKING_BROOM_SITE_SLUG` | optional | `davenport` (default) |
+| `BOOKING_BROOM_SITE_SLUG` | Not needed; hardcoded to `davenport` | `davenport` (default) |
 
 See `.env.example`. Without `BOOKING_BROOM_URL` / `BOOKING_BROOM_API_KEY`, the
 route still accepts bookings and saves them locally (`bookingBroomStatus:

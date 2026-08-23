@@ -126,7 +126,7 @@ export async function forwardToBookingBroom(
   const baseUrl = (readEnv("BOOKING_BROOM_URL") || "https://app.bookingbroom.com").replace(/\/$/, "").trim();
   const apiKey = readEnv("BOOKING_BROOM_API_KEY")?.trim();
   const siteSlug =
-    readEnv("BOOKING_BROOM_SITE_SLUG")?.trim() || siteConfig.bookingSlug;
+    siteConfig.bookingSlug;
 
   const wirePayload: Record<string, unknown> = {
     customer_name: body.name,
