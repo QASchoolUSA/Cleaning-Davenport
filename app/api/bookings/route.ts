@@ -23,20 +23,21 @@ export async function POST(request: Request) {
     const configured = isBookingBroomConfigured();
 
     let bookingBroomStatus: "pending_integration" | "forwarded" | "failed" =
-      configured ? "failed" : "pending_integration";
+      "failed";
     let bookingBroomId: string | undefined;
     let bookingBroomError: string | undefined;
 
-    if (configured) {
-      const pricing = await getPricingConfig();
-      const result = await forwardToBookingBroom(body, localId, pricing);
-      if (result.forwarded) {
-        bookingBroomStatus = "forwarded";
-        bookingBroomId = result.id;
-      } else {
-        bookingBroomStatus = "failed";
-        bookingBroomError = result.error ?? "Forward to Booking Broom failed";
-      }
+    const pricing = await getPricingConfig();
+    const result = await forwardToBookingBroom(body, localId, pricing);
+    if (result.forwarded) {
+      bookingBroomStatus = "forwarded";
+      bookingBroomId = result.id;
+    } else if (!configured && !result.degraded) {
+      bookingBroomStatus = "pending_integration";
+      bookingBroomError = result.error;
+    } else {
+      bookingBroomStatus = "failed";
+      bookingBroomError = result.error ?? "Forward to Booking Broom failed";
     }
 
     const record = {
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
       bookingBroomStatus,
     );
 
-    if (configured && bookingBroomStatus === "failed") {
+    if (bookingBroomStatus === "failed") {
       return NextResponse.json(
         {
           error:

@@ -8,7 +8,7 @@ are set.
 
 | Variable | Required | Example |
 |----------|----------|---------|
-| `BOOKING_BROOM_URL` | for forward | `https://bookings.kedrik.com` or `http://localhost:3000` |
+| `BOOKING_BROOM_URL` | for forward | `https://app.bookingbroom.com` or `http://localhost:3000` |
 | `BOOKING_BROOM_API_KEY` | for forward | `bb_davenport_dev_key` (local) |
 | `BOOKING_BROOM_SITE_SLUG` | optional | `davenport` (default) |
 

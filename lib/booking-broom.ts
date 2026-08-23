@@ -1,6 +1,6 @@
 /**
  * Forward a booking to Booking Broom (manager dashboard).
- * No-ops when BOOKING_BROOM_URL / BOOKING_BROOM_API_KEY are unset.
+ * No-ops when BOOKING_BROOM_API_KEY is unset. URL defaults to production.
  */
 
 import { readEnv } from "./env";
@@ -45,6 +45,8 @@ export interface BookingBroomResult {
   forwarded: boolean;
   id?: string;
   error?: string;
+  degraded?: boolean;
+  fallback?: "kv" | "telegram";
 }
 
 /** Only what has no structured home: the customer's message and the local ID. */
@@ -112,8 +114,7 @@ function resolveServiceType(body: CalculatorBookingBody): string {
 
 export function isBookingBroomConfigured(): boolean {
   return Boolean(
-    readEnv("BOOKING_BROOM_URL")?.trim() &&
-      readEnv("BOOKING_BROOM_API_KEY")?.trim(),
+    readEnv("BOOKING_BROOM_API_KEY")?.trim(),
   );
 }
 
@@ -122,39 +123,69 @@ export async function forwardToBookingBroom(
   localId: string,
   pricing: PricingConfig = DEFAULT_PRICING_CONFIG,
 ): Promise<BookingBroomResult> {
-  const baseUrl = readEnv("BOOKING_BROOM_URL")?.replace(/\/$/, "").trim();
+  const baseUrl = (readEnv("BOOKING_BROOM_URL") || "https://app.bookingbroom.com").replace(/\/$/, "").trim();
   const apiKey = readEnv("BOOKING_BROOM_API_KEY")?.trim();
   const siteSlug =
     readEnv("BOOKING_BROOM_SITE_SLUG")?.trim() || siteConfig.bookingSlug;
 
+  const wirePayload: Record<string, unknown> = {
+    customer_name: body.name,
+    email: body.email,
+    phone: body.phone,
+    address: resolveAddress(body),
+    service_type: resolveServiceType(body),
+    preferred_date: body.preferredDate || undefined,
+    preferred_time: body.timeWindow || undefined,
+    notes: buildNotes(body, localId),
+    intent: buildIntent(body),
+    attribution: body.source?.trim()
+      ? { utm_source: body.source.trim() }
+      : undefined,
+    property: buildProperty(body, pricing),
+    quote: buildQuote(body, pricing),
+    idempotency_key: localId,
+  };
+
+  async function fallback(lastError: string): Promise<BookingBroomResult> {
+    const { captureFailedBookingForward } = await import("./booking-outbox");
+    const captured = await captureFailedBookingForward({
+      payload: wirePayload,
+      idempotencyKey: localId,
+      lastError,
+    });
+    if (captured.captured) {
+      return {
+        configured: true,
+        forwarded: true,
+        degraded: true,
+        fallback: captured.via,
+      };
+    }
+    return {
+      configured: true,
+      forwarded: false,
+      error: captured.error || lastError,
+    };
+  }
+
   if (!baseUrl || !apiKey) {
     console.info(
-      "[booking-broom] BOOKING_BROOM_URL / BOOKING_BROOM_API_KEY not set — skip forward",
+      "[booking-broom] BOOKING_BROOM_API_KEY not set — try fallback",
     );
-    return { configured: false, forwarded: false };
+    return fallback("Booking service is not configured");
   }
 
   try {
     const response = await fetch(`${baseUrl}/api/bookings`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": localId,
+      },
       body: JSON.stringify({
         site_slug: siteSlug,
         api_key: apiKey,
-        customer_name: body.name,
-        email: body.email,
-        phone: body.phone,
-        address: resolveAddress(body),
-        service_type: resolveServiceType(body),
-        preferred_date: body.preferredDate || undefined,
-        preferred_time: body.timeWindow || undefined,
-        notes: buildNotes(body, localId),
-        intent: buildIntent(body),
-        attribution: body.source?.trim()
-          ? { utm_source: body.source.trim() }
-          : undefined,
-        property: buildProperty(body, pricing),
-        quote: buildQuote(body, pricing),
+        ...wirePayload,
       }),
     });
 
@@ -164,7 +195,7 @@ export async function forwardToBookingBroom(
       };
       const error = data.error ?? `HTTP ${response.status}`;
       console.error("[booking-broom] forward failed:", error);
-      return { configured: true, forwarded: false, error };
+      return fallback(error);
     }
 
     const data = (await response.json()) as { id?: string };
@@ -172,6 +203,6 @@ export async function forwardToBookingBroom(
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[booking-broom] forward error:", message);
-    return { configured: true, forwarded: false, error: message };
+    return fallback(message);
   }
 }
