@@ -38,6 +38,7 @@ export interface CalculatorBookingBody {
   notes?: string;
   estimate?: PriceBreakdown;
   source?: string;
+  session_key?: string;
 }
 
 export interface BookingBroomResult {
@@ -144,6 +145,7 @@ export async function forwardToBookingBroom(
     property: buildProperty(body, pricing),
     quote: buildQuote(body, pricing),
     idempotency_key: localId,
+    session_key: body.session_key?.trim() || undefined,
   };
 
   async function fallback(lastError: string): Promise<BookingBroomResult> {

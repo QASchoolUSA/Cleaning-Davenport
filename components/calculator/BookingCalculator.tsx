@@ -15,7 +15,8 @@ import {
 } from "@/lib/pricing";
 import { services } from "@/lib/services";
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createSoftLeadTracker } from "@/lib/soft-lead";
 
 const TIME_WINDOWS = [
   "Morning (8am–12pm)",
@@ -188,6 +189,10 @@ export function BookingCalculator({
 }) {
   const isApp = variant === "app";
   const FREQUENCY_LABELS = frequencyLabels(config);
+  const softLead = useRef<ReturnType<typeof createSoftLeadTracker> | null>(null);
+  if (!softLead.current) {
+    softLead.current = createSoftLeadTracker();
+  }
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>({
     ...initial,
@@ -265,6 +270,38 @@ export function BookingCalculator({
     return contactOk;
   }
 
+
+  useEffect(() => {
+    const tracker = softLead.current;
+    return () => tracker?.dispose();
+  }, []);
+
+  useEffect(() => {
+    if (success) return;
+    softLead.current?.schedule({
+      customer_name: form.name || undefined,
+      email: form.email || undefined,
+      phone: form.phone || undefined,
+      address: [form.address, form.zip].filter(Boolean).join(", ") || undefined,
+      service_type: form.serviceType || undefined,
+      preferred_date: form.preferredDate || undefined,
+      preferred_time: form.timeWindow || undefined,
+      notes: form.notes || undefined,
+      intent: form.intent,
+      last_step: isApp ? APP_STEPS[step] : String(step),
+      property: {
+        bedrooms: form.bedrooms,
+        bathrooms: form.bathrooms,
+        square_feet: form.sqft,
+      },
+      quote: {
+        estimate: breakdown.total,
+        currency: "USD",
+        frequency: form.frequency,
+      },
+    });
+  }, [form, step, success, isApp, breakdown.total]);
+
   async function submit() {
     setSubmitting(true);
     setError(null);
@@ -276,7 +313,7 @@ export function BookingCalculator({
           ...form,
           estimate: breakdown,
           source: "website-calculator",
-          // TODO: Booking Broom integration — forward payload when API credentials are provided
+          session_key: softLead.current?.sessionKey,
         }),
       });
       if (!res.ok) {
