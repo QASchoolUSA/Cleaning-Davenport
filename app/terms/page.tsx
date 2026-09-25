@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: pageTitle("Terms of Service"),
   description: `Terms of service for ${siteConfig.name}.`,
   alternates: { canonical: "/terms" },
+  // Intentional noindex: legal page — skipped in Phase 2 indexing recovery
   robots: { index: false, follow: true },
 };
 

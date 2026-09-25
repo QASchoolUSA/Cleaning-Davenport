@@ -4,6 +4,8 @@ import { BookingCalculatorServer } from "@/components/calculator/BookingCalculat
 import { QuoteLaunchCard } from "@/components/QuoteLaunchCard";
 import { CtaBand, FaqList, ReviewCard, SectionHeading } from "@/components/ui";
 import { areas } from "@/lib/areas";
+import { blogPosts } from "@/lib/blog";
+import { frequencyPages } from "@/lib/frequencies";
 import { reviews, siteFaqs } from "@/lib/content";
 import { JsonLd, absoluteUrl, faqJsonLd, howToJsonLd } from "@/lib/seo";
 import { services } from "@/lib/services";
@@ -202,6 +204,75 @@ export default function HomePage() {
           >
             View all service areas →
           </Link>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <SectionHeading
+          eyebrow="Cleaning schedules"
+          title="One-time or recurring — pick what fits"
+          description="Weekly, bi-weekly, and monthly plans include schedule discounts in the calculator."
+        />
+        <div className="flex flex-wrap gap-3">
+          {frequencyPages.map((freq) => (
+            <Link
+              key={freq.slug}
+              href={`/${freq.slug}`}
+              className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium text-charcoal hover:border-teal hover:bg-teal-light"
+            >
+              {freq.name}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-line/70 bg-white/60 py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionHeading
+            eyebrow="Guides & company"
+            title="Tips, gallery, and who we are"
+            description="Practical articles plus the company pages people ask for after a quote."
+          />
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <h3 className="font-display text-2xl text-charcoal">From the blog</h3>
+              <ul className="mt-4 space-y-2 text-sm">
+                {blogPosts.slice(0, 4).map((post) => (
+                  <li key={post.slug}>
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="font-medium text-teal hover:text-teal-dark"
+                    >
+                      {post.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/blog"
+                className="mt-4 inline-block text-sm font-semibold text-teal hover:text-teal-dark"
+              >
+                All blog posts →
+              </Link>
+            </div>
+            <div className="flex flex-col gap-3 text-sm font-medium">
+              <Link href="/about" className="text-teal hover:text-teal-dark">
+                About Cleaning Davenport →
+              </Link>
+              <Link href="/gallery" className="text-teal hover:text-teal-dark">
+                Cleaning gallery →
+              </Link>
+              <Link href="/contact" className="text-teal hover:text-teal-dark">
+                Contact →
+              </Link>
+              <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+                Service areas hub →
+              </Link>
+              <Link href="/book" className="text-coral hover:text-coral-dark">
+                Get a quote / book →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

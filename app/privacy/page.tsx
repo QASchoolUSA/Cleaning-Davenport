@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: pageTitle("Privacy Policy"),
   description: `Privacy policy for ${siteConfig.name}.`,
   alternates: { canonical: "/privacy" },
+  // Intentional noindex: legal page — skipped in Phase 2 indexing recovery
   robots: { index: false, follow: true },
 };
 
