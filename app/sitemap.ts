@@ -21,8 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/services",
     "/service-areas",
     "/blog",
-    "/privacy",
-    "/terms",
+    // /privacy and /terms stay noindex (legal) — omit from sitemap
     ...frequencyPages.map((f) => `/${f.slug}`),
   ].map((path) => ({
     url: `${base}${path}`,

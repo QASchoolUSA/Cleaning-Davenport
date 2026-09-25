@@ -167,6 +167,40 @@ export default function AboutPage() {
           </p>
         </div>
       </div>
+      <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
+        <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+          <li>
+            <Link href="/services" className="text-teal hover:text-teal-dark">
+              Services →
+            </Link>
+          </li>
+          <li>
+            <Link href="/gallery" className="text-teal hover:text-teal-dark">
+              Gallery →
+            </Link>
+          </li>
+          <li>
+            <Link href="/blog" className="text-teal hover:text-teal-dark">
+              Blog →
+            </Link>
+          </li>
+          <li>
+            <Link href="/weekly-cleaning" className="text-teal hover:text-teal-dark">
+              Weekly cleaning →
+            </Link>
+          </li>
+          <li>
+            <Link href="/bi-weekly-cleaning" className="text-teal hover:text-teal-dark">
+              Bi-weekly cleaning →
+            </Link>
+          </li>
+          <li>
+            <Link href="/book" className="text-coral hover:text-coral-dark">
+              Get a quote →
+            </Link>
+          </li>
+        </ul>
+      </div>
       <CtaBand title="Want to see if we are a fit?" />
     </>
   );

@@ -80,6 +80,23 @@ export default function ServicesHubPage() {
               </Link>
             ))}
           </div>
+          <p className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+            <Link href="/gallery" className="text-teal hover:text-teal-dark">
+              Gallery →
+            </Link>
+            <Link href="/blog" className="text-teal hover:text-teal-dark">
+              Blog tips →
+            </Link>
+            <Link href="/about" className="text-teal hover:text-teal-dark">
+              About →
+            </Link>
+            <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+              Service areas →
+            </Link>
+            <Link href="/book" className="text-coral hover:text-coral-dark">
+              Get a quote →
+            </Link>
+          </p>
         </div>
       </div>
       <CtaBand />

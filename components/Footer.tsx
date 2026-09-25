@@ -37,6 +37,31 @@ export function Footer() {
               </li>
             ))}
           </ul>
+          <p className="mb-3 mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
+            Schedules
+          </p>
+          <ul className="space-y-2 text-sm text-white/75">
+            <li>
+              <Link className="hover:text-white" href="/one-time-cleaning">
+                One-time
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" href="/weekly-cleaning">
+                Weekly
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" href="/bi-weekly-cleaning">
+                Bi-weekly
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" href="/monthly-cleaning">
+                Monthly
+              </Link>
+            </li>
+          </ul>
         </div>
 
         <div>
@@ -44,6 +69,11 @@ export function Footer() {
             Areas
           </p>
           <ul className="space-y-2 text-sm text-white/75">
+            <li>
+              <Link className="hover:text-white" href="/service-areas">
+                All service areas
+              </Link>
+            </li>
             {areas.map((a) => (
               <li key={a.slug}>
                 <Link className="hover:text-white" href={`/areas/${a.slug}`}>
@@ -67,6 +97,16 @@ export function Footer() {
             <li>
               <Link className="hover:text-white" href="/pricing">
                 Pricing
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" href="/gallery">
+                Gallery
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" href="/reviews">
+                Reviews
               </Link>
             </li>
             <li>
