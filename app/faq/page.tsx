@@ -40,6 +40,64 @@ export default function FaqPage() {
         <div className="mt-10">
           <FaqList items={siteFaqs} />
         </div>
+        <div className="mt-12">
+          <h2 className="font-display text-2xl text-charcoal">
+            Explore related pages
+          </h2>
+          <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+            <li>
+              <Link href="/services" className="text-teal hover:text-teal-dark">
+                Services →
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="text-teal hover:text-teal-dark">
+                About →
+              </Link>
+            </li>
+            <li>
+              <Link href="/gallery" className="text-teal hover:text-teal-dark">
+                Gallery →
+              </Link>
+            </li>
+            <li>
+              <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+                Service areas →
+              </Link>
+            </li>
+            <li>
+              <Link href="/weekly-cleaning" className="text-teal hover:text-teal-dark">
+                Weekly cleaning →
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/bi-weekly-cleaning"
+                className="text-teal hover:text-teal-dark"
+              >
+                Bi-weekly →
+              </Link>
+            </li>
+            <li>
+              <Link href="/monthly-cleaning" className="text-teal hover:text-teal-dark">
+                Monthly →
+              </Link>
+            </li>
+            <li>
+              <Link href="/blog" className="text-teal hover:text-teal-dark">
+                Blog →
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/blog/how-often-to-clean-florida-humidity"
+                className="text-teal hover:text-teal-dark"
+              >
+                Humidity scheduling guide →
+              </Link>
+            </li>
+          </ul>
+        </div>
       </div>
       <CtaBand />
     </>

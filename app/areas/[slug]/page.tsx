@@ -11,6 +11,8 @@ import {
   SectionHeading,
 } from "@/components/ui";
 import { areas, getAreaBySlug } from "@/lib/areas";
+import { blogPosts } from "@/lib/blog";
+import { frequencyPages } from "@/lib/frequencies";
 import { JsonLd, breadcrumbJsonLd, faqJsonLd, pageTitle } from "@/lib/seo";
 import { services } from "@/lib/services";
 
@@ -46,6 +48,7 @@ export default async function AreaPage({
   const { slug } = await params;
   const area = getAreaBySlug(slug);
   if (!area) notFound();
+  const otherAreas = areas.filter((a) => a.slug !== area.slug);
   const areaFaqs = [
     ...area.faqs,
     {
@@ -113,9 +116,9 @@ export default async function AreaPage({
                 <li key={n}>• {n}</li>
               ))}
             </ul>
-            <h3 className="mt-6 font-semibold text-charcoal">Popular services</h3>
+            <h3 className="mt-6 font-semibold text-charcoal">Services we offer here</h3>
             <div className="mt-3 flex flex-wrap gap-2">
-              {services.slice(0, 5).map((s) => (
+              {services.map((s) => (
                 <Link
                   key={s.slug}
                   href={`/services/${s.slug}`}
@@ -125,12 +128,78 @@ export default async function AreaPage({
                 </Link>
               ))}
             </div>
+            <h3 className="mt-6 font-semibold text-charcoal">Schedules</h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {frequencyPages.map((freq) => (
+                <Link
+                  key={freq.slug}
+                  href={`/${freq.slug}`}
+                  className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-charcoal hover:border-teal"
+                >
+                  {freq.name}
+                </Link>
+              ))}
+            </div>
           </aside>
         </div>
 
         <section className="mt-16">
           <SectionHeading title={`FAQ for ${area.name}`} />
           <FaqList items={areaFaqs} />
+        </section>
+
+        <section className="mt-16">
+          <SectionHeading
+            title="Nearby communities"
+            description="Same pay-after-cleaning model across our Central Florida routes."
+          />
+          <ul className="flex flex-wrap gap-3">
+            {otherAreas.map((a) => (
+              <li key={a.slug}>
+                <Link
+                  href={`/areas/${a.slug}`}
+                  className="rounded-full border border-line bg-white px-4 py-2 text-sm font-medium hover:border-teal"
+                >
+                  {a.name}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link
+                href="/service-areas"
+                className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium hover:border-teal"
+              >
+                All service areas →
+              </Link>
+            </li>
+          </ul>
+          <ul className="mt-6 space-y-2 text-sm font-medium">
+            {blogPosts.slice(0, 4).map((post) => (
+              <li key={post.slug}>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="text-teal hover:text-teal-dark"
+                >
+                  {post.title}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href="/blog" className="text-teal hover:text-teal-dark">
+                All blog posts →
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="text-teal hover:text-teal-dark">
+                Contact →
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="text-teal hover:text-teal-dark">
+                About →
+              </Link>
+            </li>
+          </ul>
         </section>
 
         <section className="mt-16">

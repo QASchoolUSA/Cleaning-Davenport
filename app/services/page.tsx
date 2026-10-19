@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs, CtaBand, SectionHeading } from "@/components/ui";
+import { areas } from "@/lib/areas";
+import { blogPosts } from "@/lib/blog";
 import { pageTitle } from "@/lib/seo";
 import { services } from "@/lib/services";
 
@@ -29,6 +31,14 @@ export default function ServicesHubPage() {
           Every service has its own checklist and pricing baseline. Pick the
           one that matches your home — then fine-tune square footage, rooms, and
           add-ons in the calculator.
+        </p>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
+          House and apartment visits cover day-to-day kitchens, baths, and
+          floors. Deep and move-out cleans add detail time for build-up or empty
+          units. Airbnb turnovers follow a guest-ready checklist between stays.
+          Maintenance plans keep an already decent baseline from sliding —
+          especially in Central Florida humidity. Post-construction is reserved
+          for renovation dust, not a stretched standard clean.
         </p>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {services.map((service) => (
@@ -93,10 +103,51 @@ export default function ServicesHubPage() {
             <Link href="/service-areas" className="text-teal hover:text-teal-dark">
               Service areas →
             </Link>
+            <Link href="/contact" className="text-teal hover:text-teal-dark">
+              Contact →
+            </Link>
             <Link href="/book" className="text-coral hover:text-coral-dark">
               Get a quote →
             </Link>
           </p>
+        </div>
+
+        <div className="mt-16">
+          <SectionHeading
+            title="Where we clean"
+            description="Davenport is home base — open a community page for local routing notes."
+          />
+          <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {areas.map((area) => (
+              <li key={area.slug}>
+                <Link
+                  href={`/areas/${area.slug}`}
+                  className="block rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-charcoal hover:border-teal hover:text-teal"
+                >
+                  {area.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-16">
+          <SectionHeading
+            title="Guides that pair with these services"
+            description="Read the tip first if you are deciding between deep vs maintenance, turnovers, or move-out scope."
+          />
+          <ul className="space-y-2 text-sm font-medium">
+            {blogPosts.map((post) => (
+              <li key={post.slug}>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="text-teal hover:text-teal-dark"
+                >
+                  {post.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       <CtaBand />

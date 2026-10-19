@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { Breadcrumbs } from "@/components/ui";
+import { areas } from "@/lib/areas";
 import { siteConfig } from "@/lib/site";
 import { useState } from "react";
 
@@ -25,6 +27,13 @@ export default function ContactPage() {
             your neighborhood? Send a note — or jump straight into the booking
             calculator.
           </p>
+          <p className="mt-4 text-sm leading-relaxed text-muted">
+            Most scheduling happens through the online estimator: pick a
+            service, home size, and frequency, then request a date or save the
+            quote. Email works best for access notes, gated-community
+            instructions, or whether your ZIP sits on a current route. We are a
+            mobile service-area team — not a walk-in storefront.
+          </p>
           <div className="mt-8 space-y-3 rounded-2xl border border-line bg-white p-6 text-sm">
             <p>
               <span className="font-semibold text-charcoal">Email:</span>{" "}
@@ -48,6 +57,87 @@ export default function ContactPage() {
               <span className="text-muted">{siteConfig.serviceAreaLabel}</span>
             </p>
             <p className="text-muted">{siteConfig.serviceAreaPolicy}</p>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            <h2 className="font-display text-2xl text-charcoal">
+              Browse before you write
+            </h2>
+            <p className="text-sm text-muted">
+              Open a neighborhood page for local detail, or jump to the service
+              and schedule pages most people ask about.
+            </p>
+            <ul className="flex flex-wrap gap-x-3 gap-y-2 text-sm font-medium">
+              {areas.map((area) => (
+                <li key={area.slug}>
+                  <Link
+                    href={`/areas/${area.slug}`}
+                    className="text-teal hover:text-teal-dark"
+                  >
+                    {area.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+              <li>
+                <Link href="/services" className="text-teal hover:text-teal-dark">
+                  All services →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/house-cleaning"
+                  className="text-teal hover:text-teal-dark"
+                >
+                  House cleaning →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/deep-cleaning"
+                  className="text-teal hover:text-teal-dark"
+                >
+                  Deep cleaning →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/weekly-cleaning"
+                  className="text-teal hover:text-teal-dark"
+                >
+                  Weekly →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/bi-weekly-cleaning"
+                  className="text-teal hover:text-teal-dark"
+                >
+                  Bi-weekly →
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-teal hover:text-teal-dark">
+                  About →
+                </Link>
+              </li>
+              <li>
+                <Link href="/gallery" className="text-teal hover:text-teal-dark">
+                  Gallery →
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="text-teal hover:text-teal-dark">
+                  Blog →
+                </Link>
+              </li>
+              <li>
+                <Link href="/book" className="text-coral hover:text-coral-dark">
+                  Get a quote →
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 

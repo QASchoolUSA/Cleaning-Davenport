@@ -29,6 +29,20 @@ export default function BlogIndexPage() {
           Human-written guides to help you decide what to clean, how often, and
           when to call in a pro.
         </p>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
+          These articles pair with our service pages — spring and deep-clean
+          guides for whole-home resets, turnover tips for Airbnb hosts, move-out
+          notes for deposit photos, and humidity scheduling for weekly vs
+          bi-weekly plans. Prefer a quote first? Use the{" "}
+          <Link href="/book" className="font-semibold text-teal">
+            booking calculator
+          </Link>{" "}
+          or browse{" "}
+          <Link href="/services" className="font-semibold text-teal">
+            services
+          </Link>
+          .
+        </p>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {blogPosts.map((post) => (
             <Link
@@ -57,6 +71,63 @@ export default function BlogIndexPage() {
             </Link>
           ))}
         </div>
+        <ul className="mt-12 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+          <li>
+            <Link
+              href="/services/house-cleaning"
+              className="text-teal hover:text-teal-dark"
+            >
+              House cleaning →
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/services/airbnb-cleaning"
+              className="text-teal hover:text-teal-dark"
+            >
+              Airbnb cleaning →
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/services/move-out-move-in-cleaning"
+              className="text-teal hover:text-teal-dark"
+            >
+              Move-out cleaning →
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/services/deep-cleaning"
+              className="text-teal hover:text-teal-dark"
+            >
+              Deep cleaning →
+            </Link>
+          </li>
+          <li>
+            <Link href="/weekly-cleaning" className="text-teal hover:text-teal-dark">
+              Weekly →
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/bi-weekly-cleaning"
+              className="text-teal hover:text-teal-dark"
+            >
+              Bi-weekly →
+            </Link>
+          </li>
+          <li>
+            <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+              Service areas →
+            </Link>
+          </li>
+          <li>
+            <Link href="/about" className="text-teal hover:text-teal-dark">
+              About →
+            </Link>
+          </li>
+        </ul>
       </div>
       <CtaBand />
     </>

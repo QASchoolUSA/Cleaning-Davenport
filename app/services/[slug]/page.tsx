@@ -10,6 +10,9 @@ import {
   FaqList,
   SectionHeading,
 } from "@/components/ui";
+import { areas } from "@/lib/areas";
+import { blogPosts } from "@/lib/blog";
+import { frequencyPages } from "@/lib/frequencies";
 import {
   JsonLd,
   breadcrumbJsonLd,
@@ -18,6 +21,29 @@ import {
   serviceJsonLd,
 } from "@/lib/seo";
 import { getServiceBySlug, services } from "@/lib/services";
+
+/** Topic bridges from service leaves → blog posts (existing content only). */
+const serviceBlogLinks: Record<string, string[]> = {
+  "house-cleaning": [
+    "spring-cleaning-checklist-davenport",
+    "how-often-to-clean-florida-humidity",
+  ],
+  "apartment-cleaning": [
+    "move-out-cleaning-deposit-tips",
+    "how-often-to-clean-florida-humidity",
+  ],
+  "move-out-move-in-cleaning": ["move-out-cleaning-deposit-tips"],
+  "airbnb-cleaning": ["airbnb-turnover-tips-central-florida"],
+  "maintenance-cleaning": [
+    "deep-clean-vs-regular-cleaning",
+    "how-often-to-clean-florida-humidity",
+  ],
+  "deep-cleaning": [
+    "deep-clean-vs-regular-cleaning",
+    "spring-cleaning-checklist-davenport",
+  ],
+  "post-construction-cleaning": ["post-construction-dust-cleaning-guide"],
+};
 
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
@@ -55,6 +81,9 @@ export default async function ServicePage({
   const related = services.filter((s) =>
     service.relatedSlugs.includes(s.slug),
   );
+  const relatedPosts = (serviceBlogLinks[service.slug] ?? [])
+    .map((slug) => blogPosts.find((p) => p.slug === slug))
+    .filter((p): p is (typeof blogPosts)[number] => Boolean(p));
 
   return (
     <>
@@ -175,6 +204,64 @@ export default async function ServicePage({
                 </Link>
               ))}
             </div>
+          </section>
+        ) : null}
+
+        <section className="mt-16">
+          <SectionHeading
+            title="Schedules and areas"
+            description="Recurring discounts stack with this service in the calculator."
+          />
+          <div className="flex flex-wrap gap-3">
+            {frequencyPages.map((freq) => (
+              <Link
+                key={freq.slug}
+                href={`/${freq.slug}`}
+                className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium hover:border-teal hover:bg-teal-light"
+              >
+                {freq.name}
+              </Link>
+            ))}
+          </div>
+          <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+            {areas.map((area) => (
+              <li key={area.slug}>
+                <Link
+                  href={`/areas/${area.slug}`}
+                  className="text-teal hover:text-teal-dark"
+                >
+                  {area.name}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+                Service areas hub →
+              </Link>
+            </li>
+            <li>
+              <Link href="/services" className="text-teal hover:text-teal-dark">
+                All services →
+              </Link>
+            </li>
+          </ul>
+        </section>
+
+        {relatedPosts.length > 0 ? (
+          <section className="mt-12">
+            <SectionHeading title="Related guides" />
+            <ul className="space-y-2 text-sm font-medium">
+              {relatedPosts.map((post) => (
+                <li key={post.slug}>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="text-teal hover:text-teal-dark"
+                  >
+                    {post.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         ) : null}
       </div>

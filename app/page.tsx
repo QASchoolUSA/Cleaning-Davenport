@@ -237,7 +237,7 @@ export default function HomePage() {
             <div>
               <h3 className="font-display text-2xl text-charcoal">From the blog</h3>
               <ul className="mt-4 space-y-2 text-sm">
-                {blogPosts.slice(0, 4).map((post) => (
+                {blogPosts.map((post) => (
                   <li key={post.slug}>
                     <Link
                       href={`/blog/${post.slug}`}
@@ -252,7 +252,7 @@ export default function HomePage() {
                 href="/blog"
                 className="mt-4 inline-block text-sm font-semibold text-teal hover:text-teal-dark"
               >
-                All blog posts →
+                Blog hub →
               </Link>
             </div>
             <div className="flex flex-col gap-3 text-sm font-medium">

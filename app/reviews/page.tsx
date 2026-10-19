@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Breadcrumbs, CtaBand, ReviewCard } from "@/components/ui";
 import { reviews } from "@/lib/content";
 import { pageTitle } from "@/lib/seo";
@@ -33,6 +34,48 @@ export default function ReviewsPage() {
             <ReviewCard key={r.name} {...r} />
           ))}
         </div>
+        <ul className="mt-12 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+          <li>
+            <Link href="/services" className="text-teal hover:text-teal-dark">
+              Services →
+            </Link>
+          </li>
+          <li>
+            <Link href="/about" className="text-teal hover:text-teal-dark">
+              About →
+            </Link>
+          </li>
+          <li>
+            <Link href="/gallery" className="text-teal hover:text-teal-dark">
+              Gallery →
+            </Link>
+          </li>
+          <li>
+            <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+              Service areas →
+            </Link>
+          </li>
+          <li>
+            <Link href="/areas/davenport-fl" className="text-teal hover:text-teal-dark">
+              Davenport →
+            </Link>
+          </li>
+          <li>
+            <Link href="/areas/champions-gate" className="text-teal hover:text-teal-dark">
+              Champions Gate →
+            </Link>
+          </li>
+          <li>
+            <Link href="/contact" className="text-teal hover:text-teal-dark">
+              Contact →
+            </Link>
+          </li>
+          <li>
+            <Link href="/book" className="text-coral hover:text-coral-dark">
+              Get a quote →
+            </Link>
+          </li>
+        </ul>
       </div>
       <CtaBand title="Ready to see for yourself?" />
     </>
