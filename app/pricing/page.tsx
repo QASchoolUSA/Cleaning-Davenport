@@ -169,6 +169,63 @@ export default async function PricingPage() {
               </Link>
             ))}
           </div>
+          <h3 className="mt-10 font-display text-2xl">Schedule pages</h3>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/one-time-cleaning"
+              className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium hover:border-teal"
+            >
+              One-time
+            </Link>
+            <Link
+              href="/weekly-cleaning"
+              className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium hover:border-teal"
+            >
+              Weekly
+            </Link>
+            <Link
+              href="/bi-weekly-cleaning"
+              className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium hover:border-teal"
+            >
+              Bi-weekly
+            </Link>
+            <Link
+              href="/monthly-cleaning"
+              className="rounded-full border border-line bg-cream px-4 py-2 text-sm font-medium hover:border-teal"
+            >
+              Monthly
+            </Link>
+          </div>
+          <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+            <li>
+              <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+                Service areas →
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="text-teal hover:text-teal-dark">
+                About →
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="text-teal hover:text-teal-dark">
+                Contact →
+              </Link>
+            </li>
+            <li>
+              <Link href="/gallery" className="text-teal hover:text-teal-dark">
+                Gallery →
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/blog/how-often-to-clean-florida-humidity"
+                className="text-teal hover:text-teal-dark"
+              >
+                Humidity schedule guide →
+              </Link>
+            </li>
+          </ul>
           <Link
             href="/book"
             className="mt-8 inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white hover:bg-coral-dark"

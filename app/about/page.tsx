@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs, CtaBand } from "@/components/ui";
+import { areas } from "@/lib/areas";
+import { blogPosts } from "@/lib/blog";
 import { pageTitle } from "@/lib/seo";
+import { services } from "@/lib/services";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -160,11 +163,81 @@ export default function AboutPage() {
           <p>{siteConfig.serviceAreaPolicy}</p>
           <p>
             Coverage centers on Davenport with nearby Central Florida communities
-            when routes allow. See{" "}
-            <Link href="/service-areas">service areas</Link> for neighborhood
-            detail, or ask when you request a quote if your address sits just
-            outside our usual path.
+            when routes allow. Neighborhood pages for{" "}
+            {areas.map((area, index) => (
+              <span key={area.slug}>
+                {index > 0 ? (index === areas.length - 1 ? ", and " : ", ") : null}
+                <Link href={`/areas/${area.slug}`}>{area.name}</Link>
+              </span>
+            ))}{" "}
+            live under{" "}
+            <Link href="/service-areas">service areas</Link>. Ask when you
+            request a quote if your address sits just outside our usual path.
           </p>
+        </div>
+
+        <div className="mt-16">
+          <h2 className="font-display text-3xl text-charcoal">
+            Services and schedules we offer
+          </h2>
+          <p className="mt-3 max-w-2xl text-muted">
+            Each service uses its own checklist. Recurring plans apply schedule
+            discounts in the calculator — you still pay after each visit.
+          </p>
+          <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+            {services.map((service) => (
+              <li key={service.slug}>
+                <Link
+                  href={`/services/${service.slug}`}
+                  className="text-teal hover:text-teal-dark"
+                >
+                  {service.shortName}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+            <li>
+              <Link href="/one-time-cleaning" className="text-teal hover:text-teal-dark">
+                One-time
+              </Link>
+            </li>
+            <li>
+              <Link href="/weekly-cleaning" className="text-teal hover:text-teal-dark">
+                Weekly
+              </Link>
+            </li>
+            <li>
+              <Link href="/bi-weekly-cleaning" className="text-teal hover:text-teal-dark">
+                Bi-weekly
+              </Link>
+            </li>
+            <li>
+              <Link href="/monthly-cleaning" className="text-teal hover:text-teal-dark">
+                Monthly
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="mt-16">
+          <h2 className="font-display text-3xl text-charcoal">From the blog</h2>
+          <p className="mt-3 max-w-2xl text-muted">
+            Practical guides for humidity, turnovers, and move-outs — written for
+            Central Florida homes, not generic checklists.
+          </p>
+          <ul className="mt-6 space-y-2 text-sm font-medium">
+            {blogPosts.map((post) => (
+              <li key={post.slug}>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="text-teal hover:text-teal-dark"
+                >
+                  {post.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
@@ -175,23 +248,23 @@ export default function AboutPage() {
             </Link>
           </li>
           <li>
+            <Link href="/service-areas" className="text-teal hover:text-teal-dark">
+              Service areas →
+            </Link>
+          </li>
+          <li>
             <Link href="/gallery" className="text-teal hover:text-teal-dark">
               Gallery →
             </Link>
           </li>
           <li>
+            <Link href="/contact" className="text-teal hover:text-teal-dark">
+              Contact →
+            </Link>
+          </li>
+          <li>
             <Link href="/blog" className="text-teal hover:text-teal-dark">
               Blog →
-            </Link>
-          </li>
-          <li>
-            <Link href="/weekly-cleaning" className="text-teal hover:text-teal-dark">
-              Weekly cleaning →
-            </Link>
-          </li>
-          <li>
-            <Link href="/bi-weekly-cleaning" className="text-teal hover:text-teal-dark">
-              Bi-weekly cleaning →
             </Link>
           </li>
           <li>

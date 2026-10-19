@@ -79,12 +79,46 @@ export default function GalleryPage() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+        <p className="mt-10 max-w-2xl text-sm leading-relaxed text-muted">
+          Kitchens and baths usually show the biggest before/after difference on
+          house and deep cleans. Airbnb turnovers emphasize beds, baths, and
+          guest-facing surfaces. Move-out visits look emptier by design — floors
+          and cabinets need to be reachable. Browse a service page for the
+          checklist that matches the photos you care about.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
           <Link href="/services" className="text-teal hover:text-teal-dark">
             Browse services →
           </Link>
+          <Link
+            href="/services/house-cleaning"
+            className="text-teal hover:text-teal-dark"
+          >
+            House cleaning →
+          </Link>
+          <Link
+            href="/services/deep-cleaning"
+            className="text-teal hover:text-teal-dark"
+          >
+            Deep cleaning →
+          </Link>
+          <Link
+            href="/services/airbnb-cleaning"
+            className="text-teal hover:text-teal-dark"
+          >
+            Airbnb cleaning →
+          </Link>
+          <Link
+            href="/services/move-out-move-in-cleaning"
+            className="text-teal hover:text-teal-dark"
+          >
+            Move-out cleaning →
+          </Link>
           <Link href="/about" className="text-teal hover:text-teal-dark">
             About us →
+          </Link>
+          <Link href="/contact" className="text-teal hover:text-teal-dark">
+            Contact →
           </Link>
           <Link href="/blog" className="text-teal hover:text-teal-dark">
             Cleaning tips →
